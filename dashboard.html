@@ -1,0 +1,116 @@
+{% extends "master.html" %}
+
+{% block pagecontent %}
+<div class="row-fluid">
+	<div class="tabbable span8"> <!-- Only required for left/right tabs -->
+  		<ul class="nav nav-tabs">
+    		<li class="active"><a href="#tab1" data-toggle="tab">The Roadmap</a></li>
+    		<li><a href="#tab2" data-toggle="tab">My Tasks</a></li>
+    		<li><a href="#tab3" data-toggle="tab">Messages</a></li>
+  		</ul>
+  		<div class="tab-content">
+    		<div class="tab-pane active" id="tab1">
+      			<div class="span12">
+					<h2>All Tasks</h2>
+					<p>The Roadmap will display all project tasks and give users an overview of the project.</p>
+					<p><strong>Tasks created by all users</strong></p>
+					{% if allTasksExists %}
+					{% for t in allTasks %} 
+					<p><u>{{ t.title }} due {{t.due}}</u></p>
+   					<p>{{ t.description }}</p>
+			   		<p>created by <i>{{ t.creator.nickname }}</i></p>
+   					<br>
+   					{% endfor %}  
+   					{% else %} 	
+   					<p> No tasks found. </p>
+   					{% endif %}
+				</div>
+    		</div>
+    		<div class="tab-pane" id="tab2">
+      			<div class="span4">
+					<h2>My Tasks</h2>
+					<p>All tasks belonging to current user will be listed here.</p>
+					<p><strong>Tasks created by {{ userNick }}</strong></p>
+					{% if myTasksExists %}
+					{% for t in myTasks %} 
+					<p><u>{{ t.title }} due {{t.due}}</u></p>
+   					<p>{{ t.description }}</p>
+   					<br>
+   					{% endfor %}  
+   					{% else %} 	
+   					<p> No tasks found. </p>
+   					{% endif %}
+				</div>
+    		</div>
+    		<div class="tab-pane" id="tab3">
+    			<div class="span4">
+    				<h2>Inbox</h2>
+    				<p>User notifications will be listed here.</p>
+    			</div>
+    		</div>
+  		</div>
+	</div>
+
+	<div class="span4">
+		<form class="form-horizontal" action="addTask" method="post">
+			<fieldset><legend>Add Task</legend>
+				<div class="control-group">
+				<label class="control-label" for="inputTitle">Title</label>
+					<div class="controls">
+						<input type="text" id="inputTitle" placeholder="Title" name="inputTitle">
+					</div>
+				</div>
+
+				<div class="control-group">
+				<label class="control-label" for="inputDateDue">Date Due</label>
+					<div class="controls">
+						<input type="text" id="datepicker" placeholder="Date Due" name="inputDateDue">
+					</div>
+				</div>
+
+				<div class="control-group">
+				<label class="control-label" for="inputDescription">Description</label>
+					<div class="controls">
+						<input type="text" id="inputDescription" placeholder="Description" name="inputDescription">
+					</div>
+				</div>
+
+				<div class="controls">
+					<button type="submit" class="btn btn-primary">Add task</button>
+				</div>
+			</fieldset>
+		</form>
+	</div>
+</div>
+
+<hr>
+
+<div class="row-fluid">
+	<div class="span4">
+	<h2>Current User</h2>
+	<p> {{ user }} </p>
+   	<p> {{ userEmail }} </p>
+   	<p> {{ userId }} </p>
+   	<p> {{ userNickname }} </p>
+	</div>
+
+	<!--<div class="span4">
+	<h2>List of My Tasks</h2>
+	<p><strong>Tasks created by {{ userNick }}</strong></p>
+	{% if myTasksExists %}
+	{% for t in myTasks %} 
+	<o>{{ t.title }} due {{t.due}}</p>
+   	<p>{{ t.description }}</p>
+   	<br>
+   	{% endfor %}  
+   	{% else %} 	
+   	<p> No tasks found. </p>
+   	{% endif %}
+	</div>-->
+
+	
+
+</div>
+
+
+{% endblock %}

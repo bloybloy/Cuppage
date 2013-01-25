@@ -1,0 +1,24 @@
+{% extends "master.html" %}
+
+{% block pagecontent %}
+
+<div class="row-fluid">
+	<h3>Updates and Changelog</h3>
+	<h4>Application Requirements</h4>
+	<ol>
+		<li><h5>User Account Management</h5>
+			<p>The user will be able to change his password and update his profile.</p>
+		</li>
+		<li><h5>Dashboard</h5>
+			<p>This will be the user’s main view. All users will share the same view so that every team member is on the same page in terms of the current progress of the project and what is happening next. This view will provide a visual for the overall progress.</p>
+		</li>
+		<li><h5>Create, edit and assign tasks</h5>
+			<p>From the dashboard, the user will also be able to create a task. Users with a team leader role can assign tasks to other users.</p>
+		</li>
+		<li><h5>Accept, reject and give feedback for tasks</h5>
+			<p>A user can choose to accept or reject an assigned task. He can also give feedback for a task assigned to him or others. For example, when a team member feels that he can handle a particular task better, he can request the team leader to reassign the task through feedback.</p>
+		</li>
+	</ol>
+</div>
+
+{% endblock %}

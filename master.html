@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html dir="ltr" lang="en-US">
+	<head>
+		<link href="css/bootstrap.css" rel="stylesheet">
+		<link href="css/bootstrap-responsive.css" rel="stylesheet">
+    <link href="http://code.jquery.com/ui/1.10.0/themes/base/jquery-ui.css" rel="stylesheet"/>
+		<style type="text/css">
+      		body {
+        		padding-top: 60px;
+        		padding-bottom: 40px;
+      		}
+    	</style>
+		<meta charset="utf-8">
+		 <title>{{ title }}</title>
+	</head>
+
+	<body>
+		 <div class="navbar navbar-inverse navbar-fixed-top">
+      		<div class="navbar-inner">
+        		<div class="container">
+          			<a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            			<span class="icon-bar"></span>
+            			<span class="icon-bar"></span>
+            			<span class="icon-bar"></span>
+          			</a>
+          			<a class="brand" href="/">Cuppage</a>
+                <div class="nav-collapse collapse">
+                {% if user %}
+                  <ul class="nav">
+                    <li><a href="dashboard">Dashboard</a></li>
+                    <li><a href="settings">Settings</a></li>
+                  </ul>
+                  <a class ="btn pull-right" href={{ logoutUrl }}><i class="icon-eject"></i> Sign out</a>
+                  <ul class="nav pull-right">
+                    <li><p class="navbar-text">Signed in as {{ userNick }}</p></li>
+                    <li class="divider-vertical"></li>
+                  </ul>
+
+                {% else %}
+                  <ul class="nav">
+                    <li><a href="about">About</a></li>
+                    <li><a href="updates">Updates</a></li>
+                    <li class="dropdown">
+                      <a href="#" class="dropdown-toggle" data-toggle="dropdown">Dropdown <b class="caret"></b></a>
+                      <ul class="dropdown-menu">
+                        <li><a href="#">Action</a></li>
+                        <li><a href="#">Another action</a></li>
+                        <li><a href="#">Something else here</a></li>
+                        <li class="divider"></li>
+                        <li class="nav-header">Nav header</li>
+                        <li><a href="#">Separated link</a></li>
+                        <li><a href="#">One more separated link</a></li>
+                      </ul>
+                    </li>
+                  </ul>
+                  <a class ="pull-right btn" href={{ loginUrl }}>Sign in</a>
+                  {% endif %}
+          			</div><!--/.nav-collapse -->
+        		</div>
+      		</div>
+    	</div>
+
+    	<div class="container">
+        {% if alert %}
+        <div class="alert alert-error alert-block fade in">
+          <button type="button" class="close" data-dismiss="alert">&times;</button>
+          <strong>Warning!</strong> {{ alertMsg }}
+        </div>
+        {% endif %}
+
+		{% block pagecontent %}
+		{% endblock %}
+		<hr>
+		<footer>
+			<p>&copy; Cuppage 2012</p>
+		</footer>
+		</div>
+		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.9.2/jquery-ui.min.js"></script>
+		<script src="js/bootstrap.js"></script>
+    <script>
+      $(function() {
+        $('#datepicker').datepicker({ dateFormat: "dd-mm-yy" });
+      });
+    </script>
+	</body>
+</html>

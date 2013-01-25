@@ -1,0 +1,17 @@
+{% extends "master.html" %}
+
+{% block pagecontent %}
+<form class="form-horizontal" action="settings" method="post">
+	<legend>{{ userNick }} | {{ email }}</legend>
+	<div class="control-group">
+    	<label class="control-label" for="inputNickname">Nickname</label>
+    	<div class="controls">
+      		<input type="text" id="inputNickname" name="inputNickname" placeholder="This will be your display name.">
+    	</div>
+    </div>
+
+    <div class="controls">
+    	<button type="submit" class="btn">Update</button>
+	</div>
+</form>
+{% endblock %}
