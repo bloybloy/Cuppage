@@ -144,6 +144,8 @@ class Dashboard(Handler):
             'myTasks': myTasks,
             'allTasksExists': allTasksExists,
             'allTasks': allTasks,
+            'error': None, #HEY DANIEL! I would like to have AddTask.error = "All fields need to be filled." here. 
+                            #Not sure how to pass that from AddTask(Handler) to Dashboard(Handler)
         }
         self.render(page, template_values)
 
@@ -152,7 +154,6 @@ class Dashboard(Handler):
 # START: AddTask
 class AddTask(Handler):
     def post(self):
-        #creator = self.user().nickname()
         creator = User.all().filter("email =", self.user().email()).get()
         title = self.request.get("inputTitle")
 

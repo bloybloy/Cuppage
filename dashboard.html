@@ -1,6 +1,7 @@
 {% extends "master.html" %}
 
 {% block pagecontent %}
+
 <div class="row-fluid">
 	<div class="tabbable span8"> <!-- Only required for left/right tabs -->
   		<ul class="nav nav-tabs">
@@ -27,7 +28,7 @@
 				</div>
     		</div>
     		<div class="tab-pane" id="tab2">
-      			<div class="span4">
+      			<div class="span12">
 					<h2>My Tasks</h2>
 					<p>All tasks belonging to current user will be listed here.</p>
 					<p><strong>Tasks created by {{ userNick }}</strong></p>
@@ -43,7 +44,7 @@
 				</div>
     		</div>
     		<div class="tab-pane" id="tab3">
-    			<div class="span4">
+    			<div class="span12">
     				<h2>Inbox</h2>
     				<p>User notifications will be listed here.</p>
     			</div>
@@ -80,36 +81,25 @@
 				</div>
 			</fieldset>
 		</form>
+		{% if error %}
+		<div class="alert alert-error alert-block fade in">
+			<button type="button" class="close" data-dismiss="alert">&times;</button>
+			<strong>Warning!</strong> {{ error }}
+		</div>
+		{% endif %}
 	</div>
 </div>
 
 <hr>
 
 <div class="row-fluid">
-	<div class="span4">
+	<div class="span8">
 	<h2>Current User</h2>
 	<p> {{ user }} </p>
    	<p> {{ userEmail }} </p>
    	<p> {{ userId }} </p>
    	<p> {{ userNickname }} </p>
 	</div>
-
-	<!--<div class="span4">
-	<h2>List of My Tasks</h2>
-	<p><strong>Tasks created by {{ userNick }}</strong></p>
-	{% if myTasksExists %}
-	{% for t in myTasks %} 
-	<o>{{ t.title }} due {{t.due}}</p>
-   	<p>{{ t.description }}</p>
-   	<br>
-   	{% endfor %}  
-   	{% else %} 	
-   	<p> No tasks found. </p>
-   	{% endif %}
-	</div>-->
-
-	
-
 </div>
 
 
