@@ -61,40 +61,7 @@ class Handler(webapp2.RequestHandler):
 
 # END : Render All Pages
 
-# START:  LandingPage
-class LandingPage(Handler):
-    def get(self):
-        page = 'landingpage.html'
-        template_values = {
-            'title': "Cuppage",
-        }
-        self.render(page, template_values)
-
-# END: LandingPage
-
-# START: Updates Page
-class Updates(Handler):
-    def get(self):
-        page = 'updates.html'
-        template_values = {
-            'title': "Cuppage | Updates",
-        }
-        self.render(page, template_values)
-
-# END: Updates Page
-
-# START: About Page
-class About(Handler):
-    def get(self):
-        page = 'about.html'
-        template_values = {
-            'title': "Cuppage | About",
-        }
-        self.render(page, template_values)
-
-# END: About Page
-
-#START: Settings
+# START: Settings
 class UserSettings(Handler):
     def get(self):
         page = 'settings.html'
@@ -112,7 +79,7 @@ class UserSettings(Handler):
 
         self.redirect('/dashboard')
 
-#END: Settings Page
+# END: Settings Page
 
 # START: Render Dashboard
 class Dashboard(Handler):
@@ -188,9 +155,6 @@ class AddTask(Handler):
 
 # START: Frame
 app = webapp2.WSGIApplication([
-    ('/', LandingPage),
-    ('/about', About),
-    ('/updates', Updates),
     ('/settings', UserSettings),
     ('/dashboard', Dashboard),
     ('/addTask', AddTask)])

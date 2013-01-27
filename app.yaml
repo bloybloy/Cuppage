@@ -14,6 +14,15 @@ handlers:
 - url: /js
   static_dir: static/js
 
+- url: /
+  script: page.app
+
+- url: /about
+  script: page.app
+
+- url: /updates
+  script: page.app
+
 - url: /dashboard
   script: main.app
   login: required
