@@ -43,7 +43,7 @@ class UserSettings(Handler):
 
     def post(self):
         update = self.Me()
-        update.nickname = self.request.get("inputNickname")
+        update.nickname = self.request.get('inputNickname')
         update.put()
 
         self.redirect('/dashboard')
@@ -54,6 +54,7 @@ class UserSettings(Handler):
 class Dashboard(Handler):
     def get(self):
         page = 'dashboard.html'
+        alert = self.request.get('alertMsg')
 
         #Check is user exists in User(db.Model). If user does not exists, add user to User(db.Model).
         if not self.Me():
@@ -80,7 +81,7 @@ class Dashboard(Handler):
             'myTasks': myTasks,
             'allTasksExists': allTasksExists,
             'allTasks': allTasks,
-            'error': None, #HEY DANIEL! I would like to have AddTask.error = "All fields need to be filled." here. 
+            'alert': alert, #HEY DANIEL! I would like to have AddTask.error = "All fields need to be filled." here. 
                             #Not sure how to pass that from AddTask(Handler) to Dashboard(Handler)
         }
         self.render(page, template_values)
@@ -90,23 +91,23 @@ class Dashboard(Handler):
 # START: AddTask
 class AddTask(Handler):
     def post(self):
-        creator = User.all().filter("email =", self.user().email()).get()
-        title = self.request.get("inputTitle")
+        creator = User.all().filter('email =', self.user().email()).get()
+        title = self.request.get('inputTitle')
 
         if title:
             addTask = Task(creator=creator, title=title)
-            if self.request.get("inputDescription") == "":
+            if self.request.get('inputDescription') == "":
                 description = "No description."
                 addTask.description = description
             else:
-                addTask.description = self.request.get("inputDescription")
-            addTask.due = datetime.datetime.strptime(self.request.get("inputDateDue"), "%d-%m-%Y").date()
+                addTask.description = self.request.get('inputDescription')
+            addTask.due = datetime.datetime.strptime(self.request.get('inputDateDue'), "%d-%m-%Y").date()
             addTask.put()
             self.redirect('/dashboard')
             
         else:
-            error = "All fields need to be filled."
-            self.redirect('/dashboard')
+            alertMsg = "You did not provide a title for your task."
+            self.redirect('/dashboard?alertMsg={}'.format(alertMsg))
 
 # END: AddTask
 
