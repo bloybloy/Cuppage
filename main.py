@@ -1,11 +1,13 @@
-import datetime
-import os
 import webapp2
+import os
+import jinja2
+import datetime
 
 from google.appengine.api import users
 from google.appengine.ext import db
-from google.appengine.ext.webapp import template
-from google.appengine.ext.webapp.util import run_wsgi_app
+
+jinja_env = jinja2.Environment(
+    loader=jinja2.FileSystemLoader(os.path.dirname(__file__)))
 
 # START: User
 class User(db.Model):
@@ -39,7 +41,6 @@ class Task(db.Model):
 # END: Task
 
 # START: Render All Pages
-
 class Handler(webapp2.RequestHandler):
     def user(self):
         user = users.get_current_user()
@@ -56,9 +57,8 @@ class Handler(webapp2.RequestHandler):
             'logoutUrl': users.create_logout_url('/'),
         }
         values.update(template_values)
-        path = os.path.join(os.path.dirname(__file__), page)
-        self.response.out.write(template.render(path, values))
-
+        template = jinja_env.get_template(page)
+        self.response.out.write(template.render(values))
 # END : Render All Pages
 
 # START: Settings
@@ -157,13 +157,8 @@ class AddTask(Handler):
 app = webapp2.WSGIApplication([
     ('/settings', UserSettings),
     ('/dashboard', Dashboard),
-    ('/addTask', AddTask)])
+    ('/addTask', AddTask)
+], debug=True)
 
 # END: Frame
-
-def main():
-    run_wsgi_app(app)
-
-if __name__ == "__main__":
-    main()
     

@@ -1,10 +1,13 @@
 import webapp2
 import os
+import jinja2
 
 from google.appengine.api import users
 from google.appengine.ext import db
-from google.appengine.ext.webapp import template
-from google.appengine.ext.webapp.util import run_wsgi_app
+#from google.appengine.ext.webapp.util import run_wsgi_app
+
+jinja_env = jinja2.Environment(
+    loader=jinja2.FileSystemLoader(os.path.dirname(__file__)))
 
 # START: Render All Pages
 
@@ -24,8 +27,8 @@ class Handler(webapp2.RequestHandler):
             'logoutUrl': users.create_logout_url('/'),
         }
         values.update(template_values)
-        path = os.path.join(os.path.dirname(__file__), page)
-        self.response.out.write(template.render(path, values))
+        template = jinja_env.get_template(page)
+        self.response.out.write(template.render(values))
 
 # END : Render All Pages
 
@@ -66,12 +69,7 @@ class About(Handler):
 app = webapp2.WSGIApplication([
     ('/', LandingPage),
     ('/about', About),
-    ('/updates', Updates)])
+    ('/updates', Updates)
+], debug=True)
 
 # END: Frame
-
-def main():
-    run_wsgi_app(app)
-
-if __name__ == "__main__":
-    main()
