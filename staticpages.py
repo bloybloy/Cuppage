@@ -3,14 +3,12 @@ import os
 import jinja2
 
 from google.appengine.api import users
-from google.appengine.ext import db
-#from google.appengine.ext.webapp.util import run_wsgi_app
 
 jinja_env = jinja2.Environment(
-    loader=jinja2.FileSystemLoader(os.path.dirname(__file__)))
+    loader=jinja2.FileSystemLoader(os.path.join(os.path.dirname(__file__), 'static', 'templates')))
+    
 
 # START: Render All Pages
-
 class Handler(webapp2.RequestHandler):
     def user(self):
         user = users.get_current_user()
@@ -29,7 +27,6 @@ class Handler(webapp2.RequestHandler):
         values.update(template_values)
         template = jinja_env.get_template(page)
         self.response.out.write(template.render(values))
-
 # END : Render All Pages
 
 # START:  LandingPage
