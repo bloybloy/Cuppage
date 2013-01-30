@@ -20,6 +20,9 @@
 							<p><u>{{ t.title }} due {{t.due}}</u></p>
    							<p>{{ t.description }}</p>
 			   				<p>created by <i>{{ t.creator.nickname }}</i></p>
+			   				<form action="delete/{{ t.key().id() }}" method="post">
+			   					<button type="submit" class="btn btn-mini btn-danger">Delete</button>
+			   				</form>
    							<br>
    							{% endfor %}  
    					{% else %} 	
@@ -81,19 +84,13 @@
 				</div>
 			</fieldset>
 		</form>
-		{% if error %}
-		<div class="alert alert-error alert-block fade in">
-			<button type="button" class="close" data-dismiss="alert">&times;</button>
-			<strong>Warning!</strong> {{ error }}
-		</div>
-		{% endif %}
 	</div>
 </div>
 
 <hr>
 
 <div class="row-fluid">
-	<div class="span8">
+	<div class="span4">
 	<h2>Current User</h2>
 	<p> user: {{ user }} </p>
    	<p> email: {{ userEmail }} </p>

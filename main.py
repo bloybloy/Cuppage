@@ -2,7 +2,7 @@ import webapp2
 import os
 import jinja2
 import datetime
-from model import *
+from model import Task, User
 
 from google.appengine.api import users
 
@@ -87,24 +87,30 @@ class Dashboard(Handler):
 # START: AddTask
 class CreateTask(Handler):
     def post(self):
-        creator = User.all().filter('email =', self.user().email()).get()
         title = self.request.get('inputTitle')
 
-        if title:
-            createTask = Task(creator=creator, title=title)
-            if self.request.get('inputDescription') == "":
-                description = "No description."
-                createTask.description = description
-            else:
-                createTask.description = self.request.get('inputDescription')
-            createTask.due = datetime.datetime.strptime(self.request.get('inputDateDue'), "%d-%m-%Y").date()
-            
-            createTask.put()
+        if title == "TEST":
+            qty = int(self.request.get('inputDescription'))
+            Task.populateTask(self.Me(), qty)
+
             self.redirect('/dashboard')
+
+        else: 
+            if title:
+                createTask = Task(creator=self.Me(), title=self.request.get('inputTitle'))
+                if self.request.get('inputDescription') == "":
+                    description = "No description."
+                    createTask.description = description
+                
+                createTask.description = self.request.get('inputDescription')
+                createTask.due = datetime.datetime.strptime(self.request.get('inputDateDue'), "%d-%m-%Y").date()
             
-        else:
-            alertMsg = "You did not provide a title for your task."
-            self.redirect('/dashboard?alertMsg={}'.format(alertMsg))
+                createTask.put()
+                self.redirect('/dashboard')
+            
+            else:
+                alertMsg = "You did not provide a title for your task."
+                self.redirect('/dashboard?alertMsg={}'.format(alertMsg))
 
 # END: AddTask
 
@@ -131,11 +137,12 @@ class EditTask(Handler):
 
 # START: DeleteTask
 class DeleteTask(Handler):
-    def post(self):
-        taskId = self.request.get('taskId')
-        targetTask = Task()
+    def post(self, taskId):
+        targetTask = Task.get_by_id(int(taskId))
 
         targetTask.delete()
+
+        self.redirect('/dashboard')
 
 # END: DeleteTask
 
@@ -149,7 +156,7 @@ app = webapp2.WSGIApplication([
     ('/dashboard', Dashboard),
     ('/create', CreateTask),
     ('/edit', EditTask),
-    ('/delete', DeleteTask),
+    webapp2.Route(r'/delete/<taskId:\d+>', DeleteTask),
 ], debug=True)
 
 # END: Frame

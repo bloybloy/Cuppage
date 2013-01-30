@@ -1,4 +1,5 @@
 from google.appengine.ext import db
+from google.appengine.api import users
 
 # START: User
 class User(db.Model):
@@ -6,8 +7,8 @@ class User(db.Model):
     nickname = db.StringProperty(default="Your Nickname")
 
     @staticmethod
-    def getTargetUser(email):
-        targetUser = User.all().filter("email =", email).get()
+    def getTargetUser(id):
+        targetUser = User.get_by_id(id)
         if targetUser:
             return targetUser
         else:
@@ -23,6 +24,15 @@ class Task(db.Model):
     due = db.DateProperty()
     created = db.DateTimeProperty(auto_now_add=True)
     #updated = db.DateTimeProperty(auto_now=True)
+
+    @staticmethod
+    def populateTask(user, qty):
+        i = 0
+        while i < qty:
+            title = "Task " + str(i)
+            Task(creator=user, title=title).put()
+            i += 1
+
 
     #@staticmethod
     #def getUserTasks(user):
