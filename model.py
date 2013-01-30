@@ -1,3 +1,5 @@
+import datetime
+
 from google.appengine.ext import db
 from google.appengine.api import users
 
@@ -28,10 +30,13 @@ class Task(db.Model):
     @staticmethod
     def populateTask(user, qty):
         i = 0
+        day = 1
         while i < qty:
             title = "Task " + str(i)
-            Task(creator=user, title=title).put()
+            date = datetime.datetime.strptime(str(day) + "-04-2013", "%d-%m-%Y").date()
+            Task(creator=user, title=title, description="A simple description.", due=date).put()
             i += 1
+            day += 1
 
 
     #@staticmethod

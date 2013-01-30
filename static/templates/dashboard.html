@@ -17,14 +17,52 @@
 					<p><strong>Tasks created by all users</strong></p>
 					{% if allTasksExists %}
 						{% for t in allTasks %} 
+						<div class="span6">
+							<!--<form class="pull-right" action="delete/{{ t.key().id() }}" method="post">
+			   					<button type="submit"><i class="icon-remove"></i></button>
+			   				</form>-->
+			   				<a href="delete/{{ t.key().id() }}" class="pull-right"><i class="icon-remove"></i></a>
+			   				<a href="#editModal" role="button" class="pull-right" data-toggle="modal"><i class="icon-pencil"></i></a>
+			   				<div id="editModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  								<div class="modal-header">
+    								<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    								<h3 id="myModalLabel">Edit Task</h3>
+  								</div>
+  								<div class="modal-body">
+  									<form class="" action="edit/{{ t.key().id() }}" method="post">	
+										<div class="control-group">
+											<label class="control-label" for="inputTitle">Title</label>
+											<div class="controls">
+												<input type="text" id="inputTitle" placeholder="{{ t.title }}" name="inputTitle">
+											</div>
+										</div>
+
+										<div class="control-group">
+											<label class="control-label" for="inputDateDue">Date Due</label>
+											<div class="controls">
+												<input type="text" id="datepicker" placeholder="{{ t.due }}" name="inputDateDue">
+											</div>
+										</div>
+
+										<div class="control-group">
+											<label class="control-label" for="inputDescription">Description</label>
+											<div class="controls">
+												<input type="text" id="inputDescription" placeholder="{{ t.description }}" name="inputDescription">
+											</div>
+										</div>
+									
+  								</div>
+  									<div class="modal-footer">
+    									<button type="submit" class="btn btn-primary">Save changes</button>
+    									</form>
+  									</div>
+								</div>
 							<p><u>{{ t.title }} due {{t.due}}</u></p>
    							<p>{{ t.description }}</p>
 			   				<p>created by <i>{{ t.creator.nickname }}</i></p>
-			   				<form action="delete/{{ t.key().id() }}" method="post">
-			   					<button type="submit" class="btn btn-mini btn-danger">Delete</button>
-			   				</form>
    							<br>
-   							{% endfor %}  
+   						</div>
+   						{% endfor %}  
    					{% else %} 	
    						<p> No tasks found. </p>
    					{% endif %}

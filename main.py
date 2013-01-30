@@ -116,9 +116,8 @@ class CreateTask(Handler):
 
 # START: UpdateTask
 class EditTask(Handler):
-    def post(self):
-        taskId = self.request.get('taskId') #TO DO: Retrieve Task by key
-        targetTask = Task(taskId)
+    def post(self, taskId):
+        targetTask = Task.get_by_id(int(taskId))
 
         newTitle = self.request.get('inputTitle')
         newDateDue = datetime.datetime.strptime(self.request.get('inputDateDue'), "%d-%m-%Y").date()
@@ -133,11 +132,13 @@ class EditTask(Handler):
 
         targetTask.put()
 
+        self.redirect('/dashboard')
+
 # END: EditTask
 
 # START: DeleteTask
 class DeleteTask(Handler):
-    def post(self, taskId):
+    def get(self, taskId):
         targetTask = Task.get_by_id(int(taskId))
 
         targetTask.delete()
@@ -155,7 +156,7 @@ app = webapp2.WSGIApplication([
     ('/settings', UserSettings),
     ('/dashboard', Dashboard),
     ('/create', CreateTask),
-    ('/edit', EditTask),
+    webapp2.Route(r'/edit/<taskId:\d+>', EditTask),
     webapp2.Route(r'/delete/<taskId:\d+>', DeleteTask),
 ], debug=True)
 
