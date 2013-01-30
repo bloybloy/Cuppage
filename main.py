@@ -66,43 +66,40 @@ class Dashboard(Handler):
         #targetTasks = targetUser.tasks
         #targetTasksExists = targetTasks.get()
 
-
-        myTasks = self.Me().tasks.order('due')
-        myTasksExists = myTasks.get()
-        allTasks = Task.all().order('due')
-        allTasksExists = allTasks.get()
         template_values = {
             'title': "Cuppage | Dashboard",
             'user': self.user(),
-            'userId': self.user().user_id(),
-            'userEmail': self.user().email(),
+            'userId': self.Me().key().id(),
+            'userEmail': self.Me().email,
             'userNick': self.Me().nickname,
-            'myTasksExists': myTasksExists,
-            'myTasks': myTasks,
-            'allTasksExists': allTasksExists,
-            'allTasks': allTasks,
-            'alert': alert, #HEY DANIEL! I would like to have AddTask.error = "All fields need to be filled." here. 
-                            #Not sure how to pass that from AddTask(Handler) to Dashboard(Handler)
+
+            'myTasksExists': self.Me().tasks.get(),
+            'myTasks': self.Me().tasks.order('due'),
+            'allTasksExists': Task.all().get(),
+            'allTasks': Task.all().order('due'),
+
+            'alert': alert,
         }
         self.render(page, template_values)
 
 # END: Render Dashboard
 
 # START: AddTask
-class AddTask(Handler):
+class CreateTask(Handler):
     def post(self):
         creator = User.all().filter('email =', self.user().email()).get()
         title = self.request.get('inputTitle')
 
         if title:
-            addTask = Task(creator=creator, title=title)
+            createTask = Task(creator=creator, title=title)
             if self.request.get('inputDescription') == "":
                 description = "No description."
-                addTask.description = description
+                createTask.description = description
             else:
-                addTask.description = self.request.get('inputDescription')
-            addTask.due = datetime.datetime.strptime(self.request.get('inputDateDue'), "%d-%m-%Y").date()
-            addTask.put()
+                createTask.description = self.request.get('inputDescription')
+            createTask.due = datetime.datetime.strptime(self.request.get('inputDateDue'), "%d-%m-%Y").date()
+            
+            createTask.put()
             self.redirect('/dashboard')
             
         else:
@@ -111,23 +108,48 @@ class AddTask(Handler):
 
 # END: AddTask
 
-# START: EditTask
+# START: UpdateTask
+class EditTask(Handler):
+    def post(self):
+        taskId = self.request.get('taskId') #TO DO: Retrieve Task by key
+        targetTask = Task(taskId)
+
+        newTitle = self.request.get('inputTitle')
+        newDateDue = datetime.datetime.strptime(self.request.get('inputDateDue'), "%d-%m-%Y").date()
+        newDescription = self.request.get('inputDescription')
+
+        if newTitle:
+            targetTask.title = newTitle
+        if newDateDue:
+            targetTask.due = newDateDue
+        if newDescription:
+            targetTask.description = newDescription
+
+        targetTask.put()
 
 # END: EditTask
 
-# START: AssignTask
+# START: DeleteTask
+class DeleteTask(Handler):
+    def post(self):
+        taskId = self.request.get('taskId')
+        targetTask = Task()
 
-# END: AssignTask
+        targetTask.delete()
+
+# END: DeleteTask
 
 # START: ListUserTasks
 
-# END:
+# END: ListUserTasks
 
 # START: Frame
 app = webapp2.WSGIApplication([
     ('/settings', UserSettings),
     ('/dashboard', Dashboard),
-    ('/addTask', AddTask)
+    ('/create', CreateTask),
+    ('/edit', EditTask),
+    ('/delete', DeleteTask),
 ], debug=True)
 
 # END: Frame

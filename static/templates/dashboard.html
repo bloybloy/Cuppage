@@ -16,14 +16,14 @@
 					<p>The Roadmap will display all project tasks and give users an overview of the project.</p>
 					<p><strong>Tasks created by all users</strong></p>
 					{% if allTasksExists %}
-					{% for t in allTasks %} 
-					<p><u>{{ t.title }} due {{t.due}}</u></p>
-   					<p>{{ t.description }}</p>
-			   		<p>created by <i>{{ t.creator.nickname }}</i></p>
-   					<br>
-   					{% endfor %}  
+						{% for t in allTasks %} 
+							<p><u>{{ t.title }} due {{t.due}}</u></p>
+   							<p>{{ t.description }}</p>
+			   				<p>created by <i>{{ t.creator.nickname }}</i></p>
+   							<br>
+   							{% endfor %}  
    					{% else %} 	
-   					<p> No tasks found. </p>
+   						<p> No tasks found. </p>
    					{% endif %}
 				</div>
     		</div>
@@ -53,8 +53,8 @@
 	</div>
 
 	<div class="span4">
-		<form class="form-horizontal" action="addTask" method="post">
-			<fieldset><legend>Add Task</legend>
+		<form class="form-horizontal" action="create" method="post">
+			<fieldset><legend>Create Task</legend>
 				<div class="control-group">
 				<label class="control-label" for="inputTitle">Title</label>
 					<div class="controls">
@@ -77,7 +77,7 @@
 				</div>
 
 				<div class="controls">
-					<button type="submit" class="btn btn-primary">Add task</button>
+					<button type="submit" class="btn btn-primary">Create task</button>
 				</div>
 			</fieldset>
 		</form>
@@ -95,10 +95,10 @@
 <div class="row-fluid">
 	<div class="span8">
 	<h2>Current User</h2>
-	<p> {{ user }} </p>
-   	<p> {{ userEmail }} </p>
-   	<p> {{ userId }} </p>
-   	<p> {{ userNickname }} </p>
+	<p> user: {{ user }} </p>
+   	<p> email: {{ userEmail }} </p>
+   	<p> ID: {{ userId }} </p>
+   	<p> Nickname: {{ userNick }} </p>
 	</div>
 </div>
 
