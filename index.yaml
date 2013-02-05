@@ -14,3 +14,8 @@ indexes:
   properties:
   - name: creator
   - name: due
+
+- kind: Task
+  properties:
+  - name: owner
+  - name: due

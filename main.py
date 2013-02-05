@@ -61,6 +61,8 @@ class Dashboard(Handler):
             addUser = User(email=users.get_current_user().email())
             addUser.put()
 
+            self.redirect('/firstlogin')
+
         #targetEmail = "kevin.loysy@gmail.com"
         #targetUser = User.getTargetUser(targetEmail)
         #targetTasks = targetUser.tasks
@@ -72,9 +74,12 @@ class Dashboard(Handler):
             'userId': self.Me().key().id(),
             'userEmail': self.Me().email,
             'userNick': self.Me().nickname,
+            'allUsers': User.all().order('nickname'),
 
-            'myTasksExists': self.Me().tasks.get(),
-            'myTasks': self.Me().tasks.order('due'),
+            'myCreatedExists': self.Me().created.get(),
+            'myCreated': self.Me().created.order('due'),
+            'myOwnedExists': self.Me().owned.get(),
+            'myOwned': self.Me().owned.order('due'),
             'allTasksExists': Task.all().get(),
             'allTasks': Task.all().order('due'),
 
@@ -104,6 +109,8 @@ class CreateTask(Handler):
                 
                 createTask.description = self.request.get('inputDescription')
                 createTask.due = datetime.datetime.strptime(self.request.get('inputDateDue'), "%d-%m-%Y").date()
+                if self.request.get('inputOwner'):    
+                    createTask.owner = User.all().filter("nickname =", self.request.get('inputOwner')).get()
             
                 createTask.put()
                 self.redirect('/dashboard')
@@ -153,6 +160,7 @@ class DeleteTask(Handler):
 
 # START: Frame
 app = webapp2.WSGIApplication([
+    ('/firstlogin', UserSettings),
     ('/settings', UserSettings),
     ('/dashboard', Dashboard),
     ('/create', CreateTask),

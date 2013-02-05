@@ -20,10 +20,11 @@ class User(db.Model):
 
 # START: Task
 class Task(db.Model):
-    creator = db.ReferenceProperty(User, collection_name="tasks", required=True)
+    creator = db.ReferenceProperty(User, collection_name="created", required=True)
     title = db.StringProperty(required=True)
     description = db.TextProperty()
     due = db.DateProperty()
+    owner = db.ReferenceProperty(User, collection_name="owned")
     created = db.DateTimeProperty(auto_now_add=True)
     #updated = db.DateTimeProperty(auto_now=True)
 

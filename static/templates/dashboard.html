@@ -3,7 +3,7 @@
 {% block pagecontent %}
 
 <div class="row-fluid">
-	<div class="tabbable span8"> <!-- Only required for left/right tabs -->
+	<div class="tabbable span6"> <!-- Only required for left/right tabs -->
   		<ul class="nav nav-tabs">
     		<li class="active"><a href="#tab1" data-toggle="tab">The Roadmap</a></li>
     		<li><a href="#tab2" data-toggle="tab">My Tasks</a></li>
@@ -16,12 +16,12 @@
 					<p>The Roadmap will display all project tasks and give users an overview of the project.</p>
 					<p><strong>Tasks created by all users</strong></p>
 					{% if allTasksExists %}
-						{% for t in allTasks %} 
+						{% for task in allTasks %} 
 						<div class="span6">
-							<!--<form class="pull-right" action="delete/{{ t.key().id() }}" method="post">
+							<!--<form class="pull-right" action="delete/{{ task.key().id() }}" method="post">
 			   					<button type="submit"><i class="icon-remove"></i></button>
 			   				</form>-->
-			   				<a href="delete/{{ t.key().id() }}" class="pull-right"><i class="icon-remove"></i></a>
+			   				<a href="delete/{{ task.key().id() }}" class="pull-right"><i class="icon-remove"></i></a>
 			   				<a href="#editModal" role="button" class="pull-right" data-toggle="modal"><i class="icon-pencil"></i></a>
 			   				<div id="editModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
   								<div class="modal-header">
@@ -29,25 +29,25 @@
     								<h3 id="myModalLabel">Edit Task</h3>
   								</div>
   								<div class="modal-body">
-  									<form class="" action="edit/{{ t.key().id() }}" method="post">	
+  									<form class="" action="edit/{{ task.key().id() }}" method="post">	
 										<div class="control-group">
 											<label class="control-label" for="inputTitle">Title</label>
 											<div class="controls">
-												<input type="text" id="inputTitle" placeholder="{{ t.title }}" name="inputTitle">
+												<input type="text" id="inputTitle" placeholder="{{ task.title }}" name="inputTitle">
 											</div>
 										</div>
 
 										<div class="control-group">
 											<label class="control-label" for="inputDateDue">Date Due</label>
 											<div class="controls">
-												<input type="text" id="datepicker" placeholder="{{ t.due }}" name="inputDateDue">
+												<input type="text" id="datepicker" placeholder="{{ task.due }}" name="inputDateDue">
 											</div>
 										</div>
 
 										<div class="control-group">
 											<label class="control-label" for="inputDescription">Description</label>
 											<div class="controls">
-												<input type="text" id="inputDescription" placeholder="{{ t.description }}" name="inputDescription">
+												<input type="text" id="inputDescription" placeholder="{{ task.description }}" name="inputDescription">
 											</div>
 										</div>
 									
@@ -57,9 +57,9 @@
     									</form>
   									</div>
 								</div>
-							<p><u>{{ t.title }} due {{t.due}}</u></p>
-   							<p>{{ t.description }}</p>
-			   				<p>created by <i>{{ t.creator.nickname }}</i></p>
+							<p><u>{{ task.title }} due {{task.due}}</u></p>
+   							<p>{{ task.description }}</p>
+			   				<p>created by <i>{{ task.creator.nickname }}</i></p>
    							<br>
    						</div>
    						{% endfor %}  
@@ -72,16 +72,32 @@
       			<div class="span12">
 					<h2>My Tasks</h2>
 					<p>All tasks belonging to current user will be listed here.</p>
-					<p><strong>Tasks created by {{ userNick }}</strong></p>
-					{% if myTasksExists %}
-					{% for t in myTasks %} 
-					<p><u>{{ t.title }} due {{t.due}}</u></p>
-   					<p>{{ t.description }}</p>
-   					<br>
-   					{% endfor %}  
-   					{% else %} 	
-   					<p> No tasks found. </p>
-   					{% endif %}
+					<div class="row-fluid">
+					<div class="span6">
+						<p><strong>Tasks <u>created</u> by {{ userNick }}</strong></p>
+						{% if myCreatedExists %}
+						{% for task in myCreated %} 
+						<p><u>{{ task.title }} due {{task.due}}</u></p>
+   						<p>{{ task.description }}</p>
+   						<br>
+   						{% endfor %}  
+   						{% else %} 	
+   						<p> No tasks found. </p>
+   						{% endif %}
+   					</div>
+   					<div class="span6">
+						<p><strong>Tasks <u>owned</u> by {{ userNick }}</strong></p>
+						{% if myOwnedExists %}
+						{% for task in myOwned %} 
+						<p><u>{{ task.title }} due {{task.due}}</u></p>
+   						<p>{{ task.description }}</p>
+   						<br>
+   						{% endfor %}  
+   						{% else %} 	
+   						<p> No tasks found. </p>
+   						{% endif %}
+   					</div>
+   					</div>
 				</div>
     		</div>
     		<div class="tab-pane" id="tab3">
@@ -93,8 +109,8 @@
   		</div>
 	</div>
 
-	<div class="span4">
-		<form class="form-horizontal" action="create" method="post">
+	<div class="span6">
+		<form class="form-horizontal" action="create" method="post" id="createTaskForm">
 			<fieldset><legend>Create Task</legend>
 				<div class="control-group">
 				<label class="control-label" for="inputTitle">Title</label>
@@ -117,6 +133,17 @@
 					</div>
 				</div>
 
+				<div class="control-group">
+				<label class="control-label" for="inputOwner">Task Owner</label>
+					<div class="controls">
+						<select name="inputOwner" form="createTaskForm">
+							{% for u in allUsers %}
+							<option>{{ u.nickname }}</option>
+							{% endfor %}
+						</select>
+					</div>
+				</div>
+
 				<div class="controls">
 					<button type="submit" class="btn btn-primary">Create task</button>
 				</div>
@@ -134,6 +161,13 @@
    	<p> email: {{ userEmail }} </p>
    	<p> ID: {{ userId }} </p>
    	<p> Nickname: {{ userNick }} </p>
+	</div>
+
+	<div class="span4">
+	<h2>All Users</h2>
+	{% for u in allUsers %}
+	<p>{{ u.nickname }}</p>
+	{% endfor %}
 	</div>
 </div>
 
