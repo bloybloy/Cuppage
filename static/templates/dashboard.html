@@ -2,34 +2,37 @@
 
 {% block pagecontent %}
 
+<h1>{{ activeProjectTitle }}</h1>
+<!-- START: Tabs -->
+
 <div class="row-fluid">
-	<div class="tabbable span6"> <!-- Only required for left/right tabs -->
+	<div class="tabbable span12"> <!-- Only required for left/right tabs -->
   		<ul class="nav nav-tabs">
     		<li class="active"><a href="#tab1" data-toggle="tab">The Roadmap</a></li>
     		<li><a href="#tab2" data-toggle="tab">My Tasks</a></li>
     		<li><a href="#tab3" data-toggle="tab">Messages</a></li>
+    		<li class="pull-right"><a href="#createModal" role="button" data-toggle="modal"><i class="icon-plus"></i> Create Task</a></li>
   		</ul>
   		<div class="tab-content">
+  			<!-- START: All Tasks Tab -->
     		<div class="tab-pane active" id="tab1">
       			<div class="span12">
 					<h2>All Tasks</h2>
-					<p>The Roadmap will display all project tasks and give users an overview of the project.</p>
+					<p>The Roadmap will display all tasks belonging to <i>{{ activeProjectTitle}}</i> and give users an overview of the project.</p>
 					<p><strong>Tasks created by all users</strong></p>
 					{% if allTasksExists %}
 						{% for task in allTasks %} 
 						<div class="span6">
-							<!--<form class="pull-right" action="delete/{{ task.key().id() }}" method="post">
-			   					<button type="submit"><i class="icon-remove"></i></button>
-			   				</form>-->
 			   				<a href="delete/{{ task.key().id() }}" class="pull-right"><i class="icon-remove"></i></a>
 			   				<a href="#editModal" role="button" class="pull-right" data-toggle="modal"><i class="icon-pencil"></i></a>
+			   				<!-- START: Edit Task Modal -->
 			   				<div id="editModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
   								<div class="modal-header">
     								<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
     								<h3 id="myModalLabel">Edit Task</h3>
   								</div>
   								<div class="modal-body">
-  									<form class="" action="edit/{{ task.key().id() }}" method="post">	
+  									<form action="edit/{{ task.key().id() }}" method="post">	
 										<div class="control-group">
 											<label class="control-label" for="inputTitle">Title</label>
 											<div class="controls">
@@ -49,14 +52,16 @@
 											<div class="controls">
 												<input type="text" id="inputDescription" placeholder="{{ task.description }}" name="inputDescription">
 											</div>
-										</div>
-									
-  								</div>
-  									<div class="modal-footer">
-    									<button type="submit" class="btn btn-primary">Save changes</button>
+										</div>	
+										<button type="submit" class="btn btn-primary">Save changes</button>
     									</form>
-  									</div>
-								</div>
+  								</div>
+  								<div class="modal-footer">
+    									
+  								</div>
+							</div>
+							<!-- END: Edit Task Modal -->   
+
 							<p><u>{{ task.title }} due {{task.due}}</u></p>
    							<p>{{ task.description }}</p>
 			   				<p>created by <i>{{ task.creator.nickname }}</i></p>
@@ -68,13 +73,15 @@
    					{% endif %}
 				</div>
     		</div>
+    		<!-- END: All Tasks Tab -->
+    		<!-- START: My Tasks Tab -->
     		<div class="tab-pane" id="tab2">
       			<div class="span12">
 					<h2>My Tasks</h2>
 					<p>All tasks belonging to current user will be listed here.</p>
 					<div class="row-fluid">
-					<div class="span6">
-						<p><strong>Tasks <u>created</u> by {{ userNick }}</strong></p>
+						<div class="span6">
+						<h3>Created</h3>
 						{% if myCreatedExists %}
 						{% for task in myCreated %} 
 						<p><u>{{ task.title }} due {{task.due}}</u></p>
@@ -84,9 +91,9 @@
    						{% else %} 	
    						<p> No tasks found. </p>
    						{% endif %}
-   					</div>
-   					<div class="span6">
-						<p><strong>Tasks <u>owned</u> by {{ userNick }}</strong></p>
+   						</div>
+   						<div class="span6">
+						<h3>Owned</h3>
 						{% if myOwnedExists %}
 						{% for task in myOwned %} 
 						<p><u>{{ task.title }} due {{task.due}}</u></p>
@@ -96,66 +103,28 @@
    						{% else %} 	
    						<p> No tasks found. </p>
    						{% endif %}
-   					</div>
+   						</div>
    					</div>
 				</div>
     		</div>
+			<!-- END: My Tasks Tab -->
+
+			<!-- START: Inbox Tab -->
     		<div class="tab-pane" id="tab3">
     			<div class="span12">
     				<h2>Inbox</h2>
     				<p>User notifications will be listed here.</p>
     			</div>
     		</div>
-  		</div>
+			<!-- END: Inbox Tab -->
+		</div>	
 	</div>
+</div>		
+<!-- END: Tabs -->
 
-	<div class="span6">
-		<form class="form-horizontal" action="create" method="post" id="createTaskForm">
-			<fieldset><legend>Create Task</legend>
-				<div class="control-group">
-				<label class="control-label" for="inputTitle">Title</label>
-					<div class="controls">
-						<input type="text" id="inputTitle" placeholder="Title" name="inputTitle">
-					</div>
-				</div>
-
-				<div class="control-group">
-				<label class="control-label" for="inputDateDue">Date Due</label>
-					<div class="controls">
-						<input type="text" id="datepicker" placeholder="Date Due" name="inputDateDue">
-					</div>
-				</div>
-
-				<div class="control-group">
-				<label class="control-label" for="inputDescription">Description</label>
-					<div class="controls">
-						<input type="text" id="inputDescription" placeholder="Description" name="inputDescription">
-					</div>
-				</div>
-
-				<div class="control-group">
-				<label class="control-label" for="inputOwner">Task Owner</label>
-					<div class="controls">
-						<select name="inputOwner" form="createTaskForm">
-							{% for u in allUsers %}
-							<option>{{ u.nickname }}</option>
-							{% endfor %}
-						</select>
-					</div>
-				</div>
-
-				<div class="controls">
-					<button type="submit" class="btn btn-primary">Create task</button>
-				</div>
-			</fieldset>
-		</form>
-	</div>
-</div>
-
-<hr>
-
+<!--
 <div class="row-fluid">
-	<div class="span4">
+	<div class="span6">
 	<h2>Current User</h2>
 	<p> user: {{ user }} </p>
    	<p> email: {{ userEmail }} </p>
@@ -163,13 +132,65 @@
    	<p> Nickname: {{ userNick }} </p>
 	</div>
 
-	<div class="span4">
+	<div class="span6">
 	<h2>All Users</h2>
 	{% for u in allUsers %}
 	<p>{{ u.nickname }}</p>
 	{% endfor %}
 	</div>
 </div>
+-->
+
+<!-- START: Create Task Modal -->
+<div id="createModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  	<div class="modal-header">
+    	<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    	<h3 id="myModalLabel">Create Task</h3>
+  	</div>
+  	<div class="modal-body">
+  		<form action="newTask" method="post" id="createTaskForm">
+			<div class="control-group">
+				<label class="control-label" for="inputTitle">Title</label>
+					<div class="controls">
+						<input type="text" id="inputTitle" placeholder="Title" name="inputTitle">
+					</div>
+			</div>
+
+			<div class="control-group">
+				<label class="control-label" for="inputDateDue">Date Due</label>
+				<div class="controls">
+					<input type="text" id="datepicker" placeholder="Date Due" name="inputDateDue">
+				</div>
+			</div>
+			
+			<div class="control-group">
+				<label class="control-label" for="inputDescription">Description</label>
+				<div class="controls">
+					<input type="text" id="inputDescription" placeholder="Description" name="inputDescription">
+				</div>
+			</div>
+
+			<div class="control-group">
+				<label class="control-label" for="inputOwner">Task Owner</label>
+				<div class="controls">
+					<select name="inputOwner" form="createTaskForm">
+						{% for u in allUsers %}
+						<option>{{ u.nickname }}</option>
+						{% endfor %}
+					</select>
+				</div>
+			</div>
+
+			<div class="controls">
+				<button type="submit" class="btn btn-primary">Create task</button>
+			</div>
+		</form>	
+	</div>
+  	<div class="modal-footer">
+    									
+	</div>
+</div>
+<!-- END: Create Task Modal --> 
 
 
-{% endblock %}
+{% endblock pagecontent %}

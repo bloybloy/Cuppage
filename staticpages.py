@@ -1,6 +1,7 @@
 import webapp2
 import os
 import jinja2
+from model import *
 
 from google.appengine.api import users
 
@@ -21,7 +22,7 @@ class Handler(webapp2.RequestHandler):
     def render(self, page, template_values={}):
         values = {
             'user': self.user(),
-            'loginUrl': users.create_login_url('/dashboard'),
+            'loginUrl': users.create_login_url('/projects'),
             'logoutUrl': users.create_logout_url('/'),
         }
         values.update(template_values)

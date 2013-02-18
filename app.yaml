@@ -23,7 +23,7 @@ handlers:
 - url: /updates
   script: staticpages.app
 
-- url: /dashboard
+- url: /projects
   script: main.app
   login: required
   auth_fail_action: redirect
