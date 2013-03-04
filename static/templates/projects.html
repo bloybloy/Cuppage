@@ -3,13 +3,63 @@
 {% block pagecontent %}
 <div class="row-fluid">
   <div class="span12">
-	<h2>My Projects</h2>
-	<ul>
+	<h1>Live Projects</h1>
+  <a href="#newProjectModal" role="button" data-toggle="modal" class="pull-right"><i class="icon-plus"></i> New Project</a>
+  <br>
+  <br>
+	<table class="table table-bordered table-hover">
+    <thead>
+      <tr>
+        <td><strong>Project Title</strong></td>
+        <td><strong>Creator</strong></td>
+      </tr>
+    </thead>
     {% for p in projects %}
-		<li><a href="activeProject/{{ p.key().id() }}">{{ p.title }}</a></li>
+		  <tr>
+        <td>
+          <a href="activeProject/{{ p.key().id() }}">{{ p.title }}</a>
+          {% if userNick == p.creator.nickname %}
+            <a href="#editProjectModal" role="button" data-toggle="modal" class="pull-right"><i class="icon-edit"></i></a>
+            <!-- START: Edit Project Modal -->
+            <div id="editProjectModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h3 id="myModalLabel">Update project details</h3>
+              </div>
+
+              <div class="modal-body">
+                <form action="editProject/{{ p.key().id() }}" method="post">
+                <div class="control-group">
+                  <label class="control-label" for="inputProjectTitle">Project Title</label>
+                  <div class="controls">
+                    <input type="text" id="inputProjectTitle" name="inputProjectTitle" placeholder="{{ p.title }}">
+                  </div>
+                </div>
+      
+                <div class="control-group">
+                  <label class="control-label" for="inputProjectDesc">Description</label>
+                  <div class="controls">
+                    <input type="text" id="inputProjectDesc" name="inputProjectDesc" placeholder="{{ p.description }}">
+                  </div>
+                </div>
+
+                <div class="controls">
+                  <button type="submit" class="btn btn-primary">Update</button>
+                </div>
+                </form> 
+              </div>
+              <div class="modal-footer">
+                      
+              </div>
+            </div>
+            <!-- END: Edit Project Modal -->
+          {% endif %}
+        </td>
+        <td>{{ p.creator.nickname }}</td>
+      </tr>
     {% endfor %}
-  </ul>
-  <a href="#newProjectModal" role="button" data-toggle="modal"><i class="icon-plus"></i> Create Project</a>
+  </table>
+  
   <div id="newProjectModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
     <div class="modal-header">
       <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>

@@ -1,8 +1,7 @@
 {% extends "master.html" %}
 
 {% block pagecontent %}
-
-<h1>{{ activeProjectTitle }}</h1>
+<h1>Dashboard | {{ activeProjectTitle }}</h1>
 <!-- START: Tabs -->
 
 <div class="row-fluid">
@@ -10,8 +9,14 @@
   		<ul class="nav nav-tabs">
     		<li class="active"><a href="#tab1" data-toggle="tab">The Roadmap</a></li>
     		<li><a href="#tab2" data-toggle="tab">My Tasks</a></li>
-    		<li><a href="#tab3" data-toggle="tab">Messages</a></li>
-    		<li class="pull-right"><a href="#createModal" role="button" data-toggle="modal"><i class="icon-plus"></i> Create Task</a></li>
+    		<li>
+    			<a href="#tab3" data-toggle="tab">Notifications
+    			{% if newRequestExists %}
+    			<i class="icon-exclamation-sign"></i>
+    			{% endif %}
+    			</a>
+    		</li>
+    		<li class="pull-right"><a href="#createModal" role="button" data-toggle="modal"><i class="icon-plus"></i> New Task</a></li>
   		</ul>
   		<div class="tab-content">
   			<!-- START: All Tasks Tab -->
@@ -20,19 +25,112 @@
 					<h2>All Tasks</h2>
 					<p>The Roadmap will display all tasks belonging to <i>{{ activeProjectTitle}}</i> and give users an overview of the project.</p>
 					<p><strong>Tasks created by all users</strong></p>
-					{% if allTasksExists %}
-						{% for task in allTasks %} 
-						<div class="span6">
-			   				<a href="delete/{{ task.key().id() }}" class="pull-right"><i class="icon-remove"></i></a>
-			   				<a href="#editModal" role="button" class="pull-right" data-toggle="modal"><i class="icon-pencil"></i></a>
-			   				<!-- START: Edit Task Modal -->
-			   				<div id="editModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+					<table class="table table-bordered table-hover">
+						<tr>
+							<thead>
+								<td><strong>Task</strong></td>
+								<td><strong>Date Due</strong></td>
+								<td><strong>Owner</strong></td>
+							</thead>
+						</tr>
+					{% if activeProjectTasksExists %}
+					
+						{% for task in activeProjectTasks %} 
+						<tr>
+							<td>
+								<a href="#allInfoModal{{ task.key().id() }}" role="button" data-toggle="modal">{{ task.title }} <i class="icon-chevron-up"></i></a>
+								<!-- START: Info Task Modal -->
+								<div id="allInfoModal{{ task.key().id() }}" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  								<div class="modal-header">
+    								<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    								<h3 id="myModalLabel">{{ task.title }}</h3>
+  								</div>
+  								<div class="modal-body">
+  									<h4>Description</h4>
+  									<p>{{ task.description}}</p>
+  									<p><i>created by {{ task.creator.nickname }}</i></p>
+  									<br>
+  									<p>This task is owned by {{ task.owner.nickname }} and due on {{ task.due|datetimeformat }}.</p>
+  									{% if task.updated %}
+  									<br>
+  									<p>Last updated on {{ task.updated|datetimeformat }}.</p>
+  									{% endif %}
+  								</div>
+  								<div class="modal-footer">
+    								<button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>	
+  								</div>
+								</div>
+								<!-- END: Info Task Modal -->
+							</td>
+							<td>{{ task.due|datetimeformat }}</td>
+							{% if task.owner.nickname %}
+							<td>{{ task.owner.nickname }}</td>
+							{% else %}
+							<td>None</td>							
+							{% endif %}
+						</tr>   
+   						{% endfor %} 
+
+   					{% else %} 	
+   							<p>No tasks found.</p>
+   					{% endif %}
+   					</table> 
+				</div>
+    		</div>
+    		<!-- END: All Tasks Tab -->
+    		<!-- START: My Tasks Tab -->
+    		<div class="tab-pane" id="tab2">
+      			<div class="span12">
+					<h2>My Tasks</h2>
+					<p>All tasks belonging to current user will be listed here.</p>
+					<p><strong>Tasks owned by me</strong></p>
+					<table class="table table-bordered table-hover">
+						<tr>
+							<thead>
+								<td><strong>Task</strong></td>
+								<td><strong>Date Due</strong></td>
+								<td><strong>Action</strong></td>
+							</thead>
+						</tr>
+					{% if myOwnedExists %}
+						{% for task in myOwned %}
+						<tr>
+							<td>
+								<a href="#myInfoModal{{ task.key().id() }}" role="button" data-toggle="modal">{{ task.title }} <i class="icon-chevron-up"></i></a>
+								<!-- START: Info Task Modal -->
+								<div id="myInfoModal{{ task.key().id() }}" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  								<div class="modal-header">
+    								<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    								<h3 id="myModalLabel">{{ task.title }}</h3>
+  								</div>
+  								<div class="modal-body">
+  									<h4>Description</h4>
+  									<p>{{ task.description}}</p>
+  									<p><i>created by {{ task.creator.nickname }}</i></p>
+  									<br>
+  									<p>This task is owned by {{ task.owner.nickname }} and due on {{ task.due|datetimeformat }}.</p>
+  									{% if task.updated %}
+  									<br>
+  									<p>Last updated on {{ task.updated|datetimeformat }}.</p>
+  									{% endif %}
+  								</div>
+  								<div class="modal-footer">
+    								<button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>	
+  								</div>
+								</div>
+								<!-- END: Info Task Modal -->
+							</td>
+							<td>{{ task.due|datetimeformat }}</td>
+							<td>
+			   					<a href="#editModal{{ task.key().id() }}" role="button" data-toggle="modal"><i class="icon-pencil"></i></a>
+			   					<!-- START: Edit Task Modal -->
+								<div id="editModal{{ task.key().id() }}" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
   								<div class="modal-header">
     								<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
     								<h3 id="myModalLabel">Edit Task</h3>
   								</div>
   								<div class="modal-body">
-  									<form action="edit/{{ task.key().id() }}" method="post">	
+  									<form action="edit/{{ task.key().id() }}" method="post" id="editTaskForm">	
 										<div class="control-group">
 											<label class="control-label" for="inputTitle">Title</label>
 											<div class="controls">
@@ -43,7 +141,7 @@
 										<div class="control-group">
 											<label class="control-label" for="inputDateDue">Date Due</label>
 											<div class="controls">
-												<input type="text" id="datepicker" placeholder="{{ task.due }}" name="inputDateDue">
+												<input type="text" id="datepicker" placeholder="{{ task.due|datetimeformat }}" name="inputDateDue">
 											</div>
 										</div>
 
@@ -52,59 +150,40 @@
 											<div class="controls">
 												<input type="text" id="inputDescription" placeholder="{{ task.description }}" name="inputDescription">
 											</div>
+										</div>
+
+										<div class="control-group">
+											<label class="control-label" for="inputOwner">Task Owner</label>
+											<div class="controls">
+												<select name="inputOwner" form="editTaskForm">
+												<option>Me</option>
+												{% for u in allUsers %}
+												{% if u.nickname == userNick %}
+												{% else %}
+													<option>{{ u.nickname }}</option>
+												{% endif %}
+												{% endfor %}
+												</select>
+											</div>
 										</div>	
+
 										<button type="submit" class="btn btn-primary">Save changes</button>
     									</form>
   								</div>
   								<div class="modal-footer">
     									
   								</div>
-							</div>
-							<!-- END: Edit Task Modal -->   
+								</div>
+								<!-- END: Edit Task Modal -->
+								<a href="delete/{{ task.key().id() }}"><i class="icon-remove"></i></a>
+			   				</td>
+						</tr>
+   						{% endfor %} 
 
-							<p><u>{{ task.title }} due {{task.due}}</u></p>
-   							<p>{{ task.description }}</p>
-			   				<p>created by <i>{{ task.creator.nickname }}</i></p>
-   							<br>
-   						</div>
-   						{% endfor %}  
    					{% else %} 	
    						<p> No tasks found. </p>
-   					{% endif %}
-				</div>
-    		</div>
-    		<!-- END: All Tasks Tab -->
-    		<!-- START: My Tasks Tab -->
-    		<div class="tab-pane" id="tab2">
-      			<div class="span12">
-					<h2>My Tasks</h2>
-					<p>All tasks belonging to current user will be listed here.</p>
-					<div class="row-fluid">
-						<div class="span6">
-						<h3>Created</h3>
-						{% if myCreatedExists %}
-						{% for task in myCreated %} 
-						<p><u>{{ task.title }} due {{task.due}}</u></p>
-   						<p>{{ task.description }}</p>
-   						<br>
-   						{% endfor %}  
-   						{% else %} 	
-   						<p> No tasks found. </p>
    						{% endif %}
-   						</div>
-   						<div class="span6">
-						<h3>Owned</h3>
-						{% if myOwnedExists %}
-						{% for task in myOwned %} 
-						<p><u>{{ task.title }} due {{task.due}}</u></p>
-   						<p>{{ task.description }}</p>
-   						<br>
-   						{% endfor %}  
-   						{% else %} 	
-   						<p> No tasks found. </p>
-   						{% endif %}
-   						</div>
-   					</div>
+   						</table> 
 				</div>
     		</div>
 			<!-- END: My Tasks Tab -->
@@ -112,8 +191,30 @@
 			<!-- START: Inbox Tab -->
     		<div class="tab-pane" id="tab3">
     			<div class="span12">
-    				<h2>Inbox</h2>
+    				<h2>Notifications</h2>
     				<p>User notifications will be listed here.</p>
+    				{% if newRequestExists %}
+    				<table class="table table-bordered table-hover">
+    					<tr>
+    						<thead>
+    							<td><strong>Notification Item</strong></td>
+    							<td><strong>Action</strong></td>
+    						</thead>
+    					</tr>
+
+    					{% for r in newRequest %}
+    						<tr>
+    							<td>You have a new task <strong>{{ r.title }}</strong> assigned to you.</td>
+    							<td>
+    								<a href="accept/{{ r.key().id() }}"><i class="icon-ok"></i></a>
+    								<a href="reject/{{ r.key().id() }}"><i class="icon-remove"></i></a>
+    							</td>
+    						</tr>
+    					{% endfor %}
+    				</table>
+    				{% else %}
+    				<p>You have no new notifications.</p>
+    				{% endif %}
     			</div>
     		</div>
 			<!-- END: Inbox Tab -->
@@ -121,25 +222,6 @@
 	</div>
 </div>		
 <!-- END: Tabs -->
-
-<!--
-<div class="row-fluid">
-	<div class="span6">
-	<h2>Current User</h2>
-	<p> user: {{ user }} </p>
-   	<p> email: {{ userEmail }} </p>
-   	<p> ID: {{ userId }} </p>
-   	<p> Nickname: {{ userNick }} </p>
-	</div>
-
-	<div class="span6">
-	<h2>All Users</h2>
-	{% for u in allUsers %}
-	<p>{{ u.nickname }}</p>
-	{% endfor %}
-	</div>
-</div>
--->
 
 <!-- START: Create Task Modal -->
 <div id="createModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
@@ -174,8 +256,12 @@
 				<label class="control-label" for="inputOwner">Task Owner</label>
 				<div class="controls">
 					<select name="inputOwner" form="createTaskForm">
+						<option>Me</option>
 						{% for u in allUsers %}
-						<option>{{ u.nickname }}</option>
+						{% if u.nickname == userNick %}
+						{% else %}
+							<option>{{ u.nickname }}</option>
+						{% endif %}
 						{% endfor %}
 					</select>
 				</div>

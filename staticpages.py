@@ -22,7 +22,7 @@ class Handler(webapp2.RequestHandler):
     def render(self, page, template_values={}):
         values = {
             'user': self.user(),
-            'loginUrl': users.create_login_url('/projects'),
+            'loginUrl': users.create_login_url('/login'),
             'logoutUrl': users.create_logout_url('/'),
         }
         values.update(template_values)

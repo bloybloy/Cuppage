@@ -2,6 +2,25 @@
 
 {% block pagecontent %}
 <div class="row-fluid">
+    {% if userNick %}
+    <div class="span3">
+    </div>
+    <div class="span6">
+        <form class="form-horizontal" action="settings" method="post">
+            <legend>{{ userNick }} | {{ email }}</legend>
+            <div class="control-group">
+               <label class="control-label" for="inputNickname">Nickname</label>
+                <div class="controls">
+                    <input type="text" id="inputNickname" name="inputNickname" placeholder="This will be your display name.">
+                </div>
+            </div>
+            
+            <div class="controls">
+               <button type="submit" class="btn">Next</button>
+           </div>
+        </form>
+    </div>
+    {% else %}
     <div class="span4">
         <h2 class="pull-right">Welcome!</h2>
     </div>
@@ -24,21 +43,7 @@
     	   </div>
         </form>
     </div>
+    {% endif %}
 </div>
 {% endblock %}
 
-<div class="span6 pull-right">
-        <form class="form-horizontal" action="settings" method="post">
-            <legend>{{ userNick }} | {{ email }}</legend>
-            <div class="control-group">
-               <label class="control-label" for="inputNickname">Nickname</label>
-                <div class="controls">
-                    <input type="text" id="inputNickname" name="inputNickname" placeholder="This will be your display name.">
-                </div>
-            </div>
-
-            <div class="controls">
-               <button type="submit" class="btn">Next</button>
-           </div>
-        </form>
-</div>

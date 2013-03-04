@@ -1,6 +1,7 @@
 import datetime
 
 from google.appengine.ext import db
+from google.appengine.ext import blobstore
 from google.appengine.api import users
 
 # START: User
@@ -34,9 +35,11 @@ class Task(db.Model):
     title = db.StringProperty(required=True)
     description = db.TextProperty()
     due = db.DateProperty()
+    milestone = db.BooleanProperty()
     owner = db.ReferenceProperty(User, collection_name="TaskOwned")
-    
-    #updated = db.DateTimeProperty(auto_now=True)
+    request = db.BooleanProperty()
+    status = db.BooleanProperty()
+    updated = db.DateTimeProperty(auto_now=True)
 
     @staticmethod
     def populateTask(project, user, qty):
@@ -51,10 +54,9 @@ class Task(db.Model):
 
 # END: Task
 
-# START: Task Request
-class TaskRequest(db.Model):
-    task = db.ReferenceProperty(Task, collection_name="request")
-    assignedOwner = db.ReferenceProperty(User, collection_name="request")
-    accept = db.BooleanProperty()
+# START: Blob
+class Blob(db.Model):
+    uploader = db.ReferenceProperty(User, collection_name="BlobUploaded", required=True)
+    blobInfo = blobstore.BlobReferenceProperty()
 
-# END: Task Request
+# END: Blob

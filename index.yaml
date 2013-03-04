@@ -19,3 +19,8 @@ indexes:
   properties:
   - name: owner
   - name: due
+
+- kind: Task
+  properties:
+  - name: project
+  - name: due
