@@ -15,7 +15,7 @@
         <td><strong>Action</strong></td>
       </tr>
     </thead>
-    {% if blobs %}
+    {% if blobsExists %}
     {% for b in blobs %}
 		  <tr>
         <td>
@@ -28,7 +28,7 @@
       </tr>
     {% endfor %}
     {% else %}
-    <tr>No blobs</tr>
+    <p>No blobs found.</p>
     {% endif %}
   </table>
   

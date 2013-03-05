@@ -31,6 +31,7 @@
 								<td><strong>Task</strong></td>
 								<td><strong>Date Due</strong></td>
 								<td><strong>Owner</strong></td>
+								<td><strong>Status</strong></td>
 							</thead>
 						</tr>
 					{% if activeProjectTasksExists %}
@@ -63,11 +64,13 @@
 								<!-- END: Info Task Modal -->
 							</td>
 							<td>{{ task.due|datetimeformat }}</td>
-							{% if task.owner.nickname %}
 							<td>{{ task.owner.nickname }}</td>
-							{% else %}
-							<td>None</td>							
-							{% endif %}
+							<td>
+								{% if task.complete == True %}
+								Done
+								{% else %}
+								Pending
+								{% endif %}
 						</tr>   
    						{% endfor %} 
 
@@ -83,7 +86,8 @@
       			<div class="span12">
 					<h2>My Tasks</h2>
 					<p>All tasks belonging to current user will be listed here.</p>
-					<p><strong>Tasks owned by me</strong></p>
+					<!-- Pending Tasks -->
+					<p><strong>Tasks Pending</strong></p>
 					<table class="table table-bordered table-hover">
 						<tr>
 							<thead>
@@ -92,8 +96,8 @@
 								<td><strong>Action</strong></td>
 							</thead>
 						</tr>
-					{% if myOwnedExists %}
-						{% for task in myOwned %}
+					{% if myPendingTasksExists %}
+						{% for task in myPendingTasks %}
 						<tr>
 							<td>
 								<a href="#myInfoModal{{ task.key().id() }}" role="button" data-toggle="modal">{{ task.title }} <i class="icon-chevron-up"></i></a>
@@ -115,6 +119,110 @@
   									{% endif %}
   								</div>
   								<div class="modal-footer">
+  									<a href="done/{{ task.key().id() }}"><i class="icon-ok"></i>  </a>
+    								<button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>	
+  								</div>
+								</div>
+								<!-- END: Info Task Modal -->
+							</td>
+							<td>{{ task.due|datetimeformat }}</td>
+							<td>
+			   					<a href="#editModal{{ task.key().id() }}" role="button" data-toggle="modal"><i class="icon-pencil"></i></a>
+			   					<!-- START: Edit Task Modal -->
+								<div id="editModal{{ task.key().id() }}" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  								<div class="modal-header">
+    								<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    								<h3 id="myModalLabel">Edit Task</h3>
+  								</div>
+  								<div class="modal-body">
+  									<form action="edit/{{ task.key().id() }}" method="post" id="editTaskForm">	
+										<div class="control-group">
+											<label class="control-label" for="inputTitle">Title</label>
+											<div class="controls">
+												<input type="text" id="inputTitle" placeholder="{{ task.title }}" name="inputTitle">
+											</div>
+										</div>
+
+										<div class="control-group">
+											<label class="control-label" for="inputDateDue">Date Due</label>
+											<div class="controls">
+												<input type="text" id="datepicker" placeholder="{{ task.due|datetimeformat }}" name="inputDateDue">
+											</div>
+										</div>
+
+										<div class="control-group">
+											<label class="control-label" for="inputDescription">Description</label>
+											<div class="controls">
+												<input type="text" id="inputDescription" placeholder="{{ task.description }}" name="inputDescription">
+											</div>
+										</div>
+
+										<div class="control-group">
+											<label class="control-label" for="inputOwner">Task Owner</label>
+											<div class="controls">
+												<select name="inputOwner" form="editTaskForm">
+												<option>Me</option>
+												{% for u in allUsers %}
+												{% if u.nickname == userNick %}
+												{% else %}
+													<option>{{ u.nickname }}</option>
+												{% endif %}
+												{% endfor %}
+												</select>
+											</div>
+										</div>	
+
+										<button type="submit" class="btn btn-primary">Save changes</button>
+    									</form>
+  								</div>
+  								<div class="modal-footer">
+    									
+  								</div>
+								</div>
+								<!-- END: Edit Task Modal -->
+								<a href="delete/{{ task.key().id() }}"><i class="icon-remove"></i></a>
+			   				</td>
+						</tr>
+   						{% endfor %} 
+
+   					{% else %} 	
+   						<p> No tasks found. </p>
+   						{% endif %}
+   						</table> 
+   						<!-- Completed Tasks -->
+   						<p><strong>Tasks Completed</strong></p>
+					<table class="table table-bordered table-hover">
+						<tr>
+							<thead>
+								<td><strong>Task</strong></td>
+								<td><strong>Date Due</strong></td>
+								<td><strong>Action</strong></td>
+							</thead>
+						</tr>
+					{% if myCompletedTasksExists %}
+						{% for task in myCompletedTasks %}
+						<tr>
+							<td>
+								<a href="#myInfoModal{{ task.key().id() }}" role="button" data-toggle="modal">{{ task.title }} <i class="icon-chevron-up"></i></a>
+								<!-- START: Info Task Modal -->
+								<div id="myInfoModal{{ task.key().id() }}" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  								<div class="modal-header">
+    								<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    								<h3 id="myModalLabel">{{ task.title }}</h3>
+  								</div>
+  								<div class="modal-body">
+  									<h4>Description</h4>
+  									<p>{{ task.description}}</p>
+  									<p><i>created by {{ task.creator.nickname }}</i></p>
+  									<br>
+  									<p>This task is owned by {{ task.owner.nickname }} and due on {{ task.due|datetimeformat }}.</p>
+  									{% if task.updated %}
+  									<br>
+  									<p>Last updated on {{ task.updated|datetimeformat }}.</p>
+  									{% endif %}
+  								</div>
+  								<div class="modal-footer">
+  									<a href="done/{{ task.key().id() }}"><i class="icon-ok"></i>  </a>
     								<button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>	
   								</div>
 								</div>

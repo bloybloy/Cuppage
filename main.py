@@ -160,8 +160,10 @@ class Dashboard(Handler):
             'activeProjectTasksExists': activeProject.Tasks.get(),
             'activeProjectTasks': activeProject.Tasks.order('due'),
 
-            'myOwnedExists': activeProject.Tasks.filter("owner =", self.Me()).get(),
-            'myOwned': activeProject.Tasks.filter("owner =", self.Me()),
+            'myPendingTasksExists': activeProject.Tasks.filter("owner =", self.Me()).filter("complete =", False).get(),
+            'myPendingTasks': activeProject.Tasks.filter("owner =", self.Me()).filter("complete =", False),
+            'myCompletedTasksExists': activeProject.Tasks.filter("owner =", self.Me()).filter("complete =", True).get(),
+            'myCompletedTasks': activeProject.Tasks.filter("owner =", self.Me()).filter("complete =", True),
 
             'newRequestExists': activeProject.Tasks.filter("owner =", self.Me()).filter("request =", True).get(),
             'newRequest': activeProject.Tasks.filter("owner =", self.Me()).filter("request =", True),
@@ -187,10 +189,9 @@ class NewTask(Handler):
 
         else: 
             if title:
-                newTask = Task(project=activeProject, creator=self.Me(), title=self.request.get('inputTitle'))                
+                newTask = Task(project=activeProject, creator=self.Me(), title=self.request.get('inputTitle'), owner=self.Me())                
                 newTask.description = self.request.get('inputDescription')
                 newTask.due = datetime.datetime.strptime(self.request.get('inputDateDue'), "%d-%m-%Y").date()
-                newTask.owner = newTask.owner = self.Me()  
 
                 if self.request.get('inputDescription') == "":
                     newTask.description = "No description."
@@ -207,6 +208,18 @@ class NewTask(Handler):
                 self.redirect('/dashboard?alertMsg={}'.format(alertMsg))
 
 # END: New Task
+
+# START: Complete Task
+class CompleteTask(Handler):
+    def get(self, taskId):
+        targetTask = Task.get_by_id(int(taskId))
+
+        targetTask.complete = True
+        targetTask.put()
+
+        self.redirect('/dashboard')
+
+# END: Complete Task
 
 # START: Edit Task
 class EditTask(Handler):
@@ -251,7 +264,7 @@ class AcceptTask(Handler):
         targetTask = Task.get_by_id(int(taskId))
 
         targetTask.request = None
-        targetTask.status = True
+        targetTask.requestStatus = True
         targetTask.put()
 
         self.redirect('/dashboard')
@@ -264,7 +277,7 @@ class RejectTask(Handler):
         targetTask = Task.get_by_id(int(taskId))
 
         targetTask.request = None
-        targetTask.status = False
+        targetTask.requestStatus = False
         targetTask.owner = targetTask.creator
         targetTask.put()
 
@@ -275,14 +288,18 @@ class RejectTask(Handler):
 # START: Render Blobstore
 class Blobstore(Handler):
     def get(self):
+        projectId = int(self.request.cookies.get('projectId'))
+        activeProject = Project.get_by_id(projectId)
         upload_url = blobstore.create_upload_url('/upload')
         page = 'blobstore.html'
         template_values = {
             'title': "Cuppage | Blobstore",
-            'upload_url': upload_url,
-            'blobs': Blob.all(),
-            #'blobs': blobstore.BlobInfo.all(),
 
+            'activeProjectTitle': activeProject.title,
+
+            'upload_url': upload_url,
+            'blobsExists': activeProject.Blobs.get(),
+            'blobs': activeProject.Blobs,
         }
         self.render(page, template_values)
 
@@ -291,9 +308,11 @@ class Blobstore(Handler):
 # START: Upload Blob
 class UploadBlob(blobstore_handlers.BlobstoreUploadHandler, Handler):
     def post(self):
+        projectId = int(self.request.cookies.get('projectId'))
+        activeProject = Project.get_by_id(projectId)
         upload_files = self.get_uploads('file')  # 'file' is file upload field in the form
         for i in upload_files:
-            newBlob = Blob(uploader=self.Me())
+            newBlob = Blob(project=activeProject, uploader=self.Me())
             newBlob.blobInfo = i.key()
 
             newBlob.put()
@@ -336,6 +355,7 @@ app = webapp2.WSGIApplication([
     ('/dashboard', Dashboard),
     webapp2.Route(r'/activeProject/<projectId:\d+>', ActiveProject),
     webapp2.Route(r'/editProject/<projectId:\d+>', EditProject),
+    webapp2.Route(r'/done/<taskId:\d+>', CompleteTask),
     webapp2.Route(r'/edit/<taskId:\d+>', EditTask),
     webapp2.Route(r'/delete/<taskId:\d+>', DeleteTask),
     webapp2.Route(r'/accept/<taskId:\d+>', AcceptTask),

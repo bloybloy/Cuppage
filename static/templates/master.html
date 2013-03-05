@@ -29,18 +29,25 @@
           <div class="nav-collapse collapse">
           {% if user %}
             <ul class="nav">
-              <li><a href="projects">Projects</a></li>
+              {% if activeProjectTitle %}
               <li><a href="dashboard">Dashboard</a></li>
               <li><a href="blobstore">Blobstore</a></li>
-              <li><a href="settings">Settings</a></li>
-              <li><a href="updates">Updates</a></li>
+              {% endif %}
             </ul>
-            <a class ="btn pull-right" href={{ logoutUrl }}><i class="icon-eject"></i> Sign out</a>
-              <ul class="nav pull-right">
-                <li><p class="navbar-text">Signed in as {{ userNick }}</p></li>
-                <li class="divider-vertical"></li>
-              </ul>
-
+            <ul class="nav pull-right">
+              <li class="dropdown">
+                <a href="#" class="dropdown-toggle pull-right" data-toggle="dropdown">Settings<b class="caret"></b></a>
+                <ul class="dropdown-menu">
+                  <li><a href="projects">Projects</a></li>
+                  <li><a href="settings">Settings</a></li>
+                  <li><a href="updates">Updates</a></li>
+                  <li class="divider"></li>
+                  <li class="nav-header">Nav header</li>
+                  <li><a href="#">Separated link</a></li>
+                  <li><a href="#">One more separated link</a></li>
+                </ul>
+              </li>
+            </ul>
           {% else %}
             <ul class="nav">
               <li><a href="about">About</a></li>

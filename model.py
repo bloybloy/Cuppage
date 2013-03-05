@@ -35,11 +35,12 @@ class Task(db.Model):
     title = db.StringProperty(required=True)
     description = db.TextProperty()
     due = db.DateProperty()
-    milestone = db.BooleanProperty()
-    owner = db.ReferenceProperty(User, collection_name="TaskOwned")
+    milestone = db.BooleanProperty(default=False)
+    owner = db.ReferenceProperty(User, collection_name="TaskOwned", required=True)
     request = db.BooleanProperty()
-    status = db.BooleanProperty()
+    requestStatus = db.BooleanProperty()
     updated = db.DateTimeProperty(auto_now=True)
+    complete = db.BooleanProperty(default=False)
 
     @staticmethod
     def populateTask(project, user, qty):
@@ -56,6 +57,7 @@ class Task(db.Model):
 
 # START: Blob
 class Blob(db.Model):
+    project = db.ReferenceProperty(Project, collection_name="Blobs", required=True)
     uploader = db.ReferenceProperty(User, collection_name="BlobUploaded", required=True)
     blobInfo = blobstore.BlobReferenceProperty()
 
