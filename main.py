@@ -156,6 +156,10 @@ class Dashboard(Handler):
             'allUsers': User.all().order('nickname'),
 
             'activeProjectTitle': activeProject.title,
+            'activeProjectDescription': activeProject.description,
+
+            'activeProjectDiscussionsExists': activeProject.Discussions.get(), 
+            'activeProjectDiscussions': activeProject.Discussions.order('created'),
 
             'activeProjectTasksExists': activeProject.Tasks.get(),
             'activeProjectTasks': activeProject.Tasks.order('due'),
@@ -174,38 +178,53 @@ class Dashboard(Handler):
 
 # END: Render Dashboard
 
-# START: New Task
-class NewTask(Handler):
+# START: Start Discussion
+class StartDiscussion(Handler):
     def post(self):
         projectId = int(self.request.cookies.get('projectId'))
         activeProject = Project.get_by_id(projectId)
         title = self.request.get('inputTitle')
 
-        if title == "TEST":
-            qty = int(self.request.get('inputDescription'))
-            Task.populateTask(activeProject, self.Me(), qty)
+        if title:
+            newDiscussion = Discussion(project=activeProject, creator=self.Me(), title=title)                
+            newDiscussion.put()
+
+            newPost = Post(discussion=newDiscussion, author=self.Me(), content=self.request.get('inputPost'))
+            newPost.put()
 
             self.redirect('/dashboard')
-
-        else: 
-            if title:
-                newTask = Task(project=activeProject, creator=self.Me(), title=self.request.get('inputTitle'), owner=self.Me())                
-                newTask.description = self.request.get('inputDescription')
-                newTask.due = datetime.datetime.strptime(self.request.get('inputDateDue'), "%d-%m-%Y").date()
-
-                if self.request.get('inputDescription') == "":
-                    newTask.description = "No description."
-
-                if self.request.get('inputOwner') != "Me":
-                    newTask.owner = User.all().filter("nickname =", self.request.get('inputOwner')).get() 
-                    newTask.request = True
-                
-                newTask.put()
-                self.redirect('/dashboard')
             
-            else:
-                alertMsg = "You did not provide a title for your task."
-                self.redirect('/dashboard?alertMsg={}'.format(alertMsg))
+        else:
+            alertMsg = "You did not provide a title for your discussion."
+            self.redirect('/dashboard?alertMsg={}'.format(alertMsg))
+
+# END: Start Discussion
+
+# START: New Task
+class AddTask(Handler):
+    def post(self):
+        projectId = int(self.request.cookies.get('projectId'))
+        activeProject = Project.get_by_id(projectId)
+        title = self.request.get('inputTitle')
+
+        if title:
+            newTask = Task(project=activeProject, creator=self.Me(), title=title, owner=self.Me())                
+            newTask.description = self.request.get('inputDescription')
+            newTask.due = datetime.datetime.strptime(self.request.get('inputDateDue'), "%d-%m-%Y").date()
+
+            if self.request.get('inputDescription') == "":
+                newTask.description = "No description."
+
+            if self.request.get('inputOwner') != "Me":
+                newTask.owner = User.all().filter("nickname =", self.request.get('inputOwner')).get() 
+                newTask.request = True
+                
+            newTask.put()
+            self.redirect('/dashboard')
+            
+        else:
+            alertMsg = "You did not provide a title for your task."
+            self.redirect('/dashboard?alertMsg={}'.format(alertMsg))
 
 # END: New Task
 
@@ -351,7 +370,8 @@ app = webapp2.WSGIApplication([
     ('/settings', UserSettings),
     ('/projects', Projects),
     ('/newProject', NewProject),
-    ('/newTask', NewTask),
+    ('/startDiscussion', StartDiscussion),
+    ('/addTask', AddTask),
     ('/dashboard', Dashboard),
     webapp2.Route(r'/activeProject/<projectId:\d+>', ActiveProject),
     webapp2.Route(r'/editProject/<projectId:\d+>', EditProject),

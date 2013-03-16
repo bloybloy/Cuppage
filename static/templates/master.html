@@ -65,7 +65,9 @@
                 </ul>
               </li>
             </ul>
-            <a class ="pull-right btn" href={{ loginUrl }}>Sign in</a>
+            {% if title != "Cuppage" %}
+            <a class ="pull-right btn" href="{{ loginUrl }}">Sign in</a>
+            {% endif %}
           {% endif %}
     		  </div><!--/.nav-collapse -->
         </div>

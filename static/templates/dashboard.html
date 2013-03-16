@@ -2,29 +2,62 @@
 
 {% block pagecontent %}
 <h1>Dashboard | {{ activeProjectTitle }}</h1>
+<p>{{ activeProjectDescription }}</p>
+<br>
 <!-- START: Tabs -->
 
 <div class="row-fluid">
 	<div class="tabbable span12"> <!-- Only required for left/right tabs -->
   		<ul class="nav nav-tabs">
-    		<li class="active"><a href="#tab1" data-toggle="tab">The Roadmap</a></li>
-    		<li><a href="#tab2" data-toggle="tab">My Tasks</a></li>
+  			<li class="active"><a href="#tab1" data-toggle="tab">Discussions</a></li>
+    		<li><a href="#tab2" data-toggle="tab">Roadmap</a></li>
+    		<li><a href="#tab3" data-toggle="tab">My Tasks</a></li>
     		<li>
-    			<a href="#tab3" data-toggle="tab">Notifications
+    			<a href="#tab4" data-toggle="tab">Notifications
     			{% if newRequestExists %}
     			<i class="icon-exclamation-sign"></i>
     			{% endif %}
     			</a>
     		</li>
-    		<li class="pull-right"><a href="#createModal" role="button" data-toggle="modal"><i class="icon-plus"></i> New Task</a></li>
   		</ul>
+
   		<div class="tab-content">
-  			<!-- START: All Tasks Tab -->
-    		<div class="tab-pane active" id="tab1">
+  			<!-- START: Discussions Tab -->
+  			<div class="tab-pane active" id="tab1">
+  				<div class="span12">
+  					<ul class="inline">
+      					<li><h4 class="text-error">Discussions</h4></li>
+						<li><a class="btn btn-mini" href="#startDiscussionModal" role="button" data-toggle="modal"><i class="icon-plus"></i>Start a discussion</a></li>
+					</ul>
+					{% if activeProjectDiscussionsExists %}
+					<table class="table table-bordered table-hover">
+						<tr>
+							<thead>
+								<td><strong>Creator</strong></td>
+								<td><strong>Title</strong></td>
+								<td><strong>Date Created</strong></td>
+							</thead>
+						</tr>
+						{% for thread in activeProjectDiscussions %}
+						<tr>
+							<td>{{ thread.creator.nickname }}</td>
+							<td>{{ thread.title }}</td>
+							<td>{{ thread.created|datetimeformat }}</td>
+						</tr>
+						{% endfor %}
+					{% else %}
+					<p>None.</p>
+					{% endif %}
+					</table>
+  				</div>
+  			</div>
+  			<!-- END: Discussions Tab -->
+  			<!-- START: Roadmap Tab -->
+    		<div class="tab-pane" id="tab2">
       			<div class="span12">
-					<h2>All Tasks</h2>
-					<p>The Roadmap will display all tasks belonging to <i>{{ activeProjectTitle}}</i> and give users an overview of the project.</p>
-					<p><strong>Tasks created by all users</strong></p>
+					<h4 class="text-error">Roadmap</h4>
+					
+					{% if activeProjectTasksExists %}
 					<table class="table table-bordered table-hover">
 						<tr>
 							<thead>
@@ -34,14 +67,12 @@
 								<td><strong>Status</strong></td>
 							</thead>
 						</tr>
-					{% if activeProjectTasksExists %}
-					
 						{% for task in activeProjectTasks %} 
 						<tr>
 							<td>
-								<a href="#allInfoModal{{ task.key().id() }}" role="button" data-toggle="modal">{{ task.title }} <i class="icon-chevron-up"></i></a>
+								{{ task.title }} <a href="#taskInfoModal{{ task.key().id() }}" role="button" data-toggle="modal"><i class="icon-chevron-up"></i></a>
 								<!-- START: Info Task Modal -->
-								<div id="allInfoModal{{ task.key().id() }}" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+								<div id="taskInfoModal{{ task.key().id() }}" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
   								<div class="modal-header">
     								<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
     								<h3 id="myModalLabel">{{ task.title }}</h3>
@@ -75,37 +106,43 @@
    						{% endfor %} 
 
    					{% else %} 	
-   							<p>No tasks found.</p>
+   							<p>There are currently no tasks in this project. Start by creating a task in the <i>My Tasks</i> tab.</p>
    					{% endif %}
    					</table> 
 				</div>
     		</div>
-    		<!-- END: All Tasks Tab -->
+    		<!-- END: Discussion Tab -->
     		<!-- START: My Tasks Tab -->
-    		<div class="tab-pane" id="tab2">
+    		<div class="tab-pane" id="tab3">
       			<div class="span12">
-					<h2>My Tasks</h2>
-					<p>All tasks belonging to current user will be listed here.</p>
+      				<ul class="inline">
+      					<li><h4 class="text-error">My Tasks</h4></li>
+						<li><a class="btn btn-mini" href="#addTaskModal" role="button" data-toggle="modal"><i class="icon-plus"></i>Add a task</a></li>
+					</ul>
+
 					<!-- Pending Tasks -->
 					<p><strong>Tasks Pending</strong></p>
+					
+					{% if myPendingTasksExists %}
 					<table class="table table-bordered table-hover">
 						<tr>
 							<thead>
 								<td><strong>Task</strong></td>
 								<td><strong>Date Due</strong></td>
-								<td><strong>Action</strong></td>
 							</thead>
 						</tr>
-					{% if myPendingTasksExists %}
 						{% for task in myPendingTasks %}
 						<tr>
 							<td>
-								<a href="#myInfoModal{{ task.key().id() }}" role="button" data-toggle="modal">{{ task.title }} <i class="icon-chevron-up"></i></a>
+								{{ task.title }} <a href="#pendingInfoModal{{ task.key().id() }}" role="button" data-toggle="modal"><i class="icon-chevron-up"></i></a>
 								<!-- START: Info Task Modal -->
-								<div id="myInfoModal{{ task.key().id() }}" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+								<div id="pendingInfoModal{{ task.key().id() }}" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
   								<div class="modal-header">
     								<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    								<h3 id="myModalLabel">{{ task.title }}</h3>
+    								<ul class="inline">
+    									<li><h3 id="myModalLabel">{{ task.title }}</h3></li>
+    									<li><a class="btn btn-mini btn-success" href="done/{{ task.key().id() }}">Done</a></li>
+    								</ul>
   								</div>
   								<div class="modal-body">
   									<h4>Description</h4>
@@ -119,20 +156,19 @@
   									{% endif %}
   								</div>
   								<div class="modal-footer">
-  									<a href="done/{{ task.key().id() }}"><i class="icon-ok"></i>  </a>
     								<button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>	
   								</div>
 								</div>
 								<!-- END: Info Task Modal -->
-							</td>
-							<td>{{ task.due|datetimeformat }}</td>
-							<td>
-			   					<a href="#editModal{{ task.key().id() }}" role="button" data-toggle="modal"><i class="icon-pencil"></i></a>
+								<a class="pull-right" href="#editTaskModal{{ task.key().id() }}" role="button" data-toggle="modal"><i class="icon-pencil"></i></a>
 			   					<!-- START: Edit Task Modal -->
-								<div id="editModal{{ task.key().id() }}" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+								<div id="editTaskModal{{ task.key().id() }}" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
   								<div class="modal-header">
     								<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    								<h3 id="myModalLabel">Edit Task</h3>
+    								<ul class="inline">
+    									<li><h3 id="myModalLabel">Edit Task</h3></li>
+    									<li><a class="btn btn-mini btn-danger" href="delete/{{ task.key().id() }}">Delete</a></li>
+    								</ul>
   								</div>
   								<div class="modal-body">
   									<form action="edit/{{ task.key().id() }}" method="post" id="editTaskForm">	
@@ -180,32 +216,34 @@
   								</div>
 								</div>
 								<!-- END: Edit Task Modal -->
-								<a href="delete/{{ task.key().id() }}"><i class="icon-remove"></i></a>
-			   				</td>
+							</td>
+							<td>{{ task.due|datetimeformat }}</td>
 						</tr>
    						{% endfor %} 
 
    					{% else %} 	
-   						<p> No tasks found. </p>
-   						{% endif %}
-   						</table> 
-   						<!-- Completed Tasks -->
-   						<p><strong>Tasks Completed</strong></p>
+   						<p>None</p>
+   					{% endif %}
+   					</table> 
+   					<br>
+   					<hr>
+   					<!-- Completed Tasks -->
+   					<p><strong>Tasks Completed</strong></p>
+					
+					{% if myCompletedTasksExists %}
 					<table class="table table-bordered table-hover">
 						<tr>
 							<thead>
 								<td><strong>Task</strong></td>
 								<td><strong>Date Due</strong></td>
-								<td><strong>Action</strong></td>
 							</thead>
 						</tr>
-					{% if myCompletedTasksExists %}
 						{% for task in myCompletedTasks %}
 						<tr>
 							<td>
-								<a href="#myInfoModal{{ task.key().id() }}" role="button" data-toggle="modal">{{ task.title }} <i class="icon-chevron-up"></i></a>
+								{{ task.title }} <a href="#completedInfoModal{{ task.key().id() }}" role="button" data-toggle="modal"><i class="icon-chevron-up"></i></a>
 								<!-- START: Info Task Modal -->
-								<div id="myInfoModal{{ task.key().id() }}" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+								<div id="completedInfoModal{{ task.key().id() }}" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
   								<div class="modal-header">
     								<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
     								<h3 id="myModalLabel">{{ task.title }}</h3>
@@ -222,74 +260,17 @@
   									{% endif %}
   								</div>
   								<div class="modal-footer">
-  									<a href="done/{{ task.key().id() }}"><i class="icon-ok"></i>  </a>
     								<button class="btn" data-dismiss="modal" aria-hidden="true">Close</button>	
   								</div>
 								</div>
 								<!-- END: Info Task Modal -->
 							</td>
 							<td>{{ task.due|datetimeformat }}</td>
-							<td>
-			   					<a href="#editModal{{ task.key().id() }}" role="button" data-toggle="modal"><i class="icon-pencil"></i></a>
-			   					<!-- START: Edit Task Modal -->
-								<div id="editModal{{ task.key().id() }}" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  								<div class="modal-header">
-    								<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    								<h3 id="myModalLabel">Edit Task</h3>
-  								</div>
-  								<div class="modal-body">
-  									<form action="edit/{{ task.key().id() }}" method="post" id="editTaskForm">	
-										<div class="control-group">
-											<label class="control-label" for="inputTitle">Title</label>
-											<div class="controls">
-												<input type="text" id="inputTitle" placeholder="{{ task.title }}" name="inputTitle">
-											</div>
-										</div>
-
-										<div class="control-group">
-											<label class="control-label" for="inputDateDue">Date Due</label>
-											<div class="controls">
-												<input type="text" id="datepicker" placeholder="{{ task.due|datetimeformat }}" name="inputDateDue">
-											</div>
-										</div>
-
-										<div class="control-group">
-											<label class="control-label" for="inputDescription">Description</label>
-											<div class="controls">
-												<input type="text" id="inputDescription" placeholder="{{ task.description }}" name="inputDescription">
-											</div>
-										</div>
-
-										<div class="control-group">
-											<label class="control-label" for="inputOwner">Task Owner</label>
-											<div class="controls">
-												<select name="inputOwner" form="editTaskForm">
-												<option>Me</option>
-												{% for u in allUsers %}
-												{% if u.nickname == userNick %}
-												{% else %}
-													<option>{{ u.nickname }}</option>
-												{% endif %}
-												{% endfor %}
-												</select>
-											</div>
-										</div>	
-
-										<button type="submit" class="btn btn-primary">Save changes</button>
-    									</form>
-  								</div>
-  								<div class="modal-footer">
-    									
-  								</div>
-								</div>
-								<!-- END: Edit Task Modal -->
-								<a href="delete/{{ task.key().id() }}"><i class="icon-remove"></i></a>
-			   				</td>
 						</tr>
    						{% endfor %} 
 
    					{% else %} 	
-   						<p> No tasks found. </p>
+   						<p>None</p>
    						{% endif %}
    						</table> 
 				</div>
@@ -297,10 +278,9 @@
 			<!-- END: My Tasks Tab -->
 
 			<!-- START: Inbox Tab -->
-    		<div class="tab-pane" id="tab3">
+    		<div class="tab-pane" id="tab4">
     			<div class="span12">
-    				<h2>Notifications</h2>
-    				<p>User notifications will be listed here.</p>
+    				<h4 class="text-error">Notifications</h4>
     				{% if newRequestExists %}
     				<table class="table table-bordered table-hover">
     					<tr>
@@ -331,14 +311,46 @@
 </div>		
 <!-- END: Tabs -->
 
-<!-- START: Create Task Modal -->
-<div id="createModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+<!-- START: Start Discussion Modal -->
+<div id="startDiscussionModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="startDiscussionModalLabel" aria-hidden="true">
   	<div class="modal-header">
     	<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-    	<h3 id="myModalLabel">Create Task</h3>
+    	<h3 id="startDiscussionModalLabel">Start a discussion</h3>
   	</div>
   	<div class="modal-body">
-  		<form action="newTask" method="post" id="createTaskForm">
+  		<form action="startDiscussion" method="post" id="startDiscussionForm">
+			<div class="control-group">
+				<label class="control-label" for="inputTitle">Title</label>
+					<div class="controls">
+						<input type="text" id="inputTitle" placeholder="Title" name="inputTitle">
+					</div>
+			</div>
+			
+			<div class="control-group">
+				<label class="control-label" for="inputDescription">Post</label>
+				<div class="controls">
+					<textarea rows="5" column="300" name="inputPost" form="startDiscussionForm"></textarea>
+				</div>
+			</div>
+
+			<div class="controls">
+				<button type="submit" class="btn btn-primary">Start discussion</button>
+			</div>
+		</form>	
+  	<div class="modal-footer">
+    									
+	</div>
+</div>
+<!-- END: Start Discussion Modal --> 
+
+<!-- START: Create Task Modal -->
+<div id="addTaskModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="addTaskModalLabel" aria-hidden="true">
+  	<div class="modal-header">
+    	<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+    	<h3 id="addTaskModalLabel">Add a task</h3>
+  	</div>
+  	<div class="modal-body">
+  		<form action="addTask" method="post" id="addTaskForm">
 			<div class="control-group">
 				<label class="control-label" for="inputTitle">Title</label>
 					<div class="controls">
@@ -363,7 +375,7 @@
 			<div class="control-group">
 				<label class="control-label" for="inputOwner">Task Owner</label>
 				<div class="controls">
-					<select name="inputOwner" form="createTaskForm">
+					<select name="inputOwner" form="addTaskForm">
 						<option>Me</option>
 						{% for u in allUsers %}
 						{% if u.nickname == userNick %}

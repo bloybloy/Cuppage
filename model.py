@@ -20,12 +20,22 @@ class Project(db.Model):
 
 # END: Project
 
-# START: ProjectUser
-class ProjectUser(db.Model):
-    project = db.ReferenceProperty(Project, collection_name="User")
-    user = db.ReferenceProperty(User, collection_name="ProjectUser")
+# START: Discussion
+class Discussion(db.Model):
+    project = db.ReferenceProperty(Project, collection_name="Discussions", required=True)
+    creator = db.ReferenceProperty(User, collection_name="DiscussionsCreated", required=True)
+    created = db.DateTimeProperty(auto_now_add=True)
+    title = db.StringProperty(required=True)    
 
-# END: ProjectUser
+# END: Discussion
+
+# START: Post
+class Post(db.Model):
+    discussion = db.ReferenceProperty(Discussion, collection_name="Posts", required=True)
+    author = db.ReferenceProperty(User, collection_name="Posts", required=True)
+    content = db.TextProperty(required=True)
+
+# END: Post
 
 # START: Task
 class Task(db.Model):
@@ -41,17 +51,6 @@ class Task(db.Model):
     requestStatus = db.BooleanProperty()
     updated = db.DateTimeProperty(auto_now=True)
     complete = db.BooleanProperty(default=False)
-
-    @staticmethod
-    def populateTask(project, user, qty):
-        i = 0
-        day = 1
-        while i < qty:
-            title = "Task " + str(i)
-            date = datetime.datetime.strptime(str(day) + "-04-2013", "%d-%m-%Y").date()
-            Task(project=project, creator=user, title=title, description="A simple description.", due=date).put()
-            i += 1
-            day += 1
 
 # END: Task
 
