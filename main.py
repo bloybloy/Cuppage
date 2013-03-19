@@ -9,16 +9,20 @@ from google.appengine.api import users
 from google.appengine.ext import blobstore
 from google.appengine.ext.webapp import blobstore_handlers
 
-def datetimeformat(value, format='%d-%b-%Y'):
+def dateformat(value, format='%d-%b-%Y'):
+    return value.strftime(format)
+
+def timeformat(value, format='%I:%M %p'):
     return value.strftime(format)
 
 jinja_env = jinja2.Environment(
     loader=jinja2.FileSystemLoader(os.path.join(os.path.dirname(__file__), 'static', 'templates')))
 
-jinja_env.filters['datetimeformat'] = datetimeformat
+jinja_env.filters['dateformat'] = dateformat
+jinja_env.filters['timeformat'] = timeformat
 
 # START: Render All Pages
-class Handler(webapp2.RequestHandler):
+class BaseHandler(webapp2.RequestHandler):
     def user(self):
         user = users.get_current_user()
         return user
@@ -26,6 +30,11 @@ class Handler(webapp2.RequestHandler):
     def Me(self):
         Me = User.all().filter("email =", self.user().email()).get()
         return Me
+
+    def activeProject(self):
+        projectId = int(self.request.cookies.get('projectId'))
+        ActiveProject = Project.get_by_id(projectId)
+        return ActiveProject
 
     def render(self, page, template_values={}):
         values = {
@@ -40,7 +49,7 @@ class Handler(webapp2.RequestHandler):
 # END : Render All Pages
 
 # START: Login
-class Login(Handler):
+class Login(BaseHandler):
     def get(self):
         #Check is user exists in User(db.Model). If user does not exists, add user to User(db.Model).
         if not self.Me():
@@ -55,7 +64,7 @@ class Login(Handler):
 # END: Login
 
 # START: Settings
-class UserSettings(Handler):
+class UserSettings(BaseHandler):
     def get(self):
         page = 'settings.html'
         template_values = {
@@ -79,7 +88,7 @@ class UserSettings(Handler):
 # END: Settings 
 
 # START: Projects
-class Projects(Handler):
+class Projects(BaseHandler):
     def get(self):
         page = 'projects.html'
         alert = self.request.get('alertMsg')
@@ -94,7 +103,7 @@ class Projects(Handler):
 # END: Projects
 
 # START: Create Project
-class NewProject(Handler):
+class NewProject(BaseHandler):
     def post(self):
         title = self.request.get('inputProjectTitle')
 
@@ -111,7 +120,7 @@ class NewProject(Handler):
 # END: Create Project
 
 # START: Edit Project
-class EditProject(Handler):
+class EditProject(BaseHandler):
     def post(self, projectId):
         targetProject = Project.get_by_id(int(projectId))
 
@@ -130,7 +139,7 @@ class EditProject(Handler):
 # END: Edit Task
 
 # START: Active Project
-class ActiveProject(Handler):
+class ActiveProject(BaseHandler):
     def get(self, projectId):
         self.response.set_cookie('projectId', projectId, path='/')
 
@@ -139,10 +148,9 @@ class ActiveProject(Handler):
 # END: Active Project
 
 # START: Render Dashboard
-class Dashboard(Handler):
+class Dashboard(BaseHandler):
     def get(self):
-        projectId = int(self.request.cookies.get('projectId'))
-        activeProject = Project.get_by_id(projectId)
+        upload_url = blobstore.create_upload_url('/upload')
         page = 'dashboard.html'
         alert = self.request.get('alertMsg')
 
@@ -155,22 +163,26 @@ class Dashboard(Handler):
             'title': "Cuppage | Dashboard",
             'allUsers': User.all().order('nickname'),
 
-            'activeProjectTitle': activeProject.title,
-            'activeProjectDescription': activeProject.description,
+            'activeProjectTitle': self.activeProject().title,
+            'activeProjectDescription': self.activeProject().description,
 
-            'activeProjectDiscussionsExists': activeProject.Discussions.get(), 
-            'activeProjectDiscussions': activeProject.Discussions.order('created'),
+            'activeProjectDiscussionsExists': self.activeProject().Discussions.get(), 
+            'activeProjectDiscussions': self.activeProject().Discussions.order('-created'),
 
-            'activeProjectTasksExists': activeProject.Tasks.get(),
-            'activeProjectTasks': activeProject.Tasks.order('due'),
+            'activeProjectTasksExists': self.activeProject().Tasks.get(),
+            'activeProjectTasks': self.activeProject().Tasks.order('due'),
 
-            'myPendingTasksExists': activeProject.Tasks.filter("owner =", self.Me()).filter("complete =", False).get(),
-            'myPendingTasks': activeProject.Tasks.filter("owner =", self.Me()).filter("complete =", False),
-            'myCompletedTasksExists': activeProject.Tasks.filter("owner =", self.Me()).filter("complete =", True).get(),
-            'myCompletedTasks': activeProject.Tasks.filter("owner =", self.Me()).filter("complete =", True),
+            'myPendingTasksExists': self.activeProject().Tasks.filter("owner =", self.Me()).filter("complete =", False).get(),
+            'myPendingTasks': self.activeProject().Tasks.filter("owner =", self.Me()).filter("complete =", False),
+            'myCompletedTasksExists': self.activeProject().Tasks.filter("owner =", self.Me()).filter("complete =", True).get(),
+            'myCompletedTasks': self.activeProject().Tasks.filter("owner =", self.Me()).filter("complete =", True),
 
-            'newRequestExists': activeProject.Tasks.filter("owner =", self.Me()).filter("request =", True).get(),
-            'newRequest': activeProject.Tasks.filter("owner =", self.Me()).filter("request =", True),
+            'newRequestExists': self.activeProject().Tasks.filter("owner =", self.Me()).filter("request =", True).get(),
+            'newRequest': self.activeProject().Tasks.filter("owner =", self.Me()).filter("request =", True),
+
+            'upload_url': upload_url,
+            'blobsExists': self.activeProject().Blobs.get(),
+            'blobs': self.activeProject().Blobs,
 
             'alert': alert,
         }
@@ -179,14 +191,12 @@ class Dashboard(Handler):
 # END: Render Dashboard
 
 # START: Start Discussion
-class StartDiscussion(Handler):
+class StartDiscussion(BaseHandler):
     def post(self):
-        projectId = int(self.request.cookies.get('projectId'))
-        activeProject = Project.get_by_id(projectId)
         title = self.request.get('inputTitle')
 
         if title:
-            newDiscussion = Discussion(project=activeProject, creator=self.Me(), title=title)                
+            newDiscussion = Discussion(project=self.activeProject(), creator=self.Me(), title=title)                
             newDiscussion.put()
 
             newPost = Post(discussion=newDiscussion, author=self.Me(), content=self.request.get('inputPost'))
@@ -200,15 +210,51 @@ class StartDiscussion(Handler):
 
 # END: Start Discussion
 
+# START: Show Discussion
+class ShowDiscussion(BaseHandler):
+    def get(self):
+        threadId = self.request.get('thread')
+        discussion = Discussion.get_by_id(int(threadId))
+        alert = self.request.get('alertMsg')
+        page = 'discussions.html'
+
+        template_values = {
+            'title': "Cuppage | Dashboard",
+            'allUsers': User.all().order('nickname'),
+
+            'activeProjectTitle': self.activeProject().title,
+
+            'discussion': discussion,
+            'posts': discussion.Posts.order('created'),
+
+            'alert': alert,
+
+        }
+        self.render(page, template_values)
+
+    def post(self, threadId):
+        newContent = self.request.get('inputPost')
+        targetThread = Discussion.get_by_id(int(threadId))
+        if newContent:
+            newPost = Post(discussion=targetThread, author=self.Me(), content=newContent)
+            newPost.put()
+
+            self.redirect('/discussion?thread={}'.format(threadId))
+
+        else:
+            alertMsg = "You did not enter any content for your post."
+            self.redirect('/discussion?alertMsg={}'.format(alertMsg))
+        
+
+# END: Show Discussion
+
 # START: New Task
-class AddTask(Handler):
+class AddTask(BaseHandler):
     def post(self):
-        projectId = int(self.request.cookies.get('projectId'))
-        activeProject = Project.get_by_id(projectId)
         title = self.request.get('inputTitle')
 
         if title:
-            newTask = Task(project=activeProject, creator=self.Me(), title=title, owner=self.Me())                
+            newTask = Task(project=self.activeProject(), creator=self.Me(), title=title, owner=self.Me())                
             newTask.description = self.request.get('inputDescription')
             newTask.due = datetime.datetime.strptime(self.request.get('inputDateDue'), "%d-%m-%Y").date()
 
@@ -229,7 +275,7 @@ class AddTask(Handler):
 # END: New Task
 
 # START: Complete Task
-class CompleteTask(Handler):
+class CompleteTask(BaseHandler):
     def get(self, taskId):
         targetTask = Task.get_by_id(int(taskId))
 
@@ -241,7 +287,7 @@ class CompleteTask(Handler):
 # END: Complete Task
 
 # START: Edit Task
-class EditTask(Handler):
+class EditTask(BaseHandler):
     def post(self, taskId):
         targetTask = Task.get_by_id(int(taskId))
 
@@ -267,7 +313,7 @@ class EditTask(Handler):
 # END: Edit Task
 
 # START: Delete Task
-class DeleteTask(Handler):
+class DeleteTask(BaseHandler):
     def get(self, taskId):
         targetTask = Task.get_by_id(int(taskId))
 
@@ -278,7 +324,7 @@ class DeleteTask(Handler):
 # END: Delete Task
 
 # START: Accept Task
-class AcceptTask(Handler):
+class AcceptTask(BaseHandler):
     def get(self, taskId):
         targetTask = Task.get_by_id(int(taskId))
 
@@ -291,7 +337,7 @@ class AcceptTask(Handler):
 # END: Accept Task
 
 # START: Reject Task
-class RejectTask(Handler):
+class RejectTask(BaseHandler):
     def get(self, taskId):
         targetTask = Task.get_by_id(int(taskId))
 
@@ -304,40 +350,18 @@ class RejectTask(Handler):
 
 # END: Reject Task
 
-# START: Render Blobstore
-class Blobstore(Handler):
-    def get(self):
-        projectId = int(self.request.cookies.get('projectId'))
-        activeProject = Project.get_by_id(projectId)
-        upload_url = blobstore.create_upload_url('/upload')
-        page = 'blobstore.html'
-        template_values = {
-            'title': "Cuppage | Blobstore",
-
-            'activeProjectTitle': activeProject.title,
-
-            'upload_url': upload_url,
-            'blobsExists': activeProject.Blobs.get(),
-            'blobs': activeProject.Blobs,
-        }
-        self.render(page, template_values)
-
-# END: Render Blobstore
-
 # START: Upload Blob
-class UploadBlob(blobstore_handlers.BlobstoreUploadHandler, Handler):
+class UploadBlob(blobstore_handlers.BlobstoreUploadHandler, BaseHandler):
     def post(self):
-        projectId = int(self.request.cookies.get('projectId'))
-        activeProject = Project.get_by_id(projectId)
         upload_files = self.get_uploads('file')  # 'file' is file upload field in the form
         for i in upload_files:
-            newBlob = Blob(project=activeProject, uploader=self.Me())
+            newBlob = Blob(project=self.activeProject(), uploader=self.Me())
             newBlob.blobInfo = i.key()
 
             newBlob.put()
         #blob_info = upload_files[0]
         #self.redirect('/serve/%s' % blob_info.key())
-        self.redirect('/blobstore')
+        self.redirect('/dashboard')
 
 # END: Upload Blob
 
@@ -351,7 +375,7 @@ class ServeBlob(blobstore_handlers.BlobstoreDownloadHandler):
 # END: Serve Blob
 
 # START: Delete Blob
-class DeleteBlob(Handler):
+class DeleteBlob(BaseHandler):
     def get(self, blobKey):
         resource = str(urllib.unquote(blobKey))
         blob_info = blobstore.BlobInfo.get(resource)
@@ -360,7 +384,7 @@ class DeleteBlob(Handler):
         blob.delete()
         blob_info.delete()
 
-        self.redirect('/blobstore')
+        self.redirect('/dashboard')
 
 # END: Delete Blob
 
@@ -371,6 +395,9 @@ app = webapp2.WSGIApplication([
     ('/projects', Projects),
     ('/newProject', NewProject),
     ('/startDiscussion', StartDiscussion),
+    ('/discussion', ShowDiscussion),
+    webapp2.Route(r'/post/<threadId:\d+>', ShowDiscussion),
+    #webapp2.Route(r'/discussion/<threadId:\d+>', ShowDiscussion),
     ('/addTask', AddTask),
     ('/dashboard', Dashboard),
     webapp2.Route(r'/activeProject/<projectId:\d+>', ActiveProject),
@@ -380,7 +407,6 @@ app = webapp2.WSGIApplication([
     webapp2.Route(r'/delete/<taskId:\d+>', DeleteTask),
     webapp2.Route(r'/accept/<taskId:\d+>', AcceptTask),
     webapp2.Route(r'/reject/<taskId:\d+>', RejectTask),
-    ('/blobstore', Blobstore),
     ('/upload', UploadBlob),
     webapp2.Route(r'/serve/<blobKey:([^/]+)?>', ServeBlob),
     webapp2.Route(r'/deleteBlob/<blobKey:([^/]+)?>', DeleteBlob),

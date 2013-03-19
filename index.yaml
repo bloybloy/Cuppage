@@ -15,6 +15,23 @@ indexes:
   - name: project
   - name: created
 
+- kind: Discussion
+  properties:
+  - name: project
+  - name: created
+    direction: desc
+
+- kind: Post
+  properties:
+  - name: discussion
+  - name: created
+
+- kind: Post
+  properties:
+  - name: discussion
+  - name: created
+    direction: desc
+
 - kind: Task
   properties:
   - name: creator

@@ -34,6 +34,7 @@ class Post(db.Model):
     discussion = db.ReferenceProperty(Discussion, collection_name="Posts", required=True)
     author = db.ReferenceProperty(User, collection_name="Posts", required=True)
     content = db.TextProperty(required=True)
+    created = db.DateTimeProperty(auto_now_add=True)
 
 # END: Post
 

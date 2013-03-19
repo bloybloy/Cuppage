@@ -1,0 +1,40 @@
+{% extends "master.html" %}
+
+{% block pagecontent %}
+<div class="row-fluid">
+	<div class="span12">
+		<h3>Discussions</h3>
+		<table class="table table-bordered table-hover">
+			<tr>
+				<thead>
+					<td><strong>Author</strong></td>
+					<td><strong>Post</strong></td>
+					<td><strong>Date Posted</strong></td>
+				</thead>
+			</tr>
+			{% for p in posts %}
+			<tr>
+				<td>{{ p.author.nickname }}</td>
+				<td>{{ p.content }}</td>
+				<td>{{ p.created|timeformat }}</td>
+			</tr>
+			{% endfor %}
+		</table>
+	</div>
+
+	<div class="span12">
+		<form action="post/{{ discussion.key().id() }}" method="post" id="newPostForm">	
+			<div class="control-group">
+			<label class="control-label" for="inputPost">Post</label>
+				<div class="controls">
+					<textarea rows="5" column="50" name="inputPost" form="newPostForm" required></textarea>
+				</div>
+			</div>
+			<div class="controls">
+				<button type="submit" class="btn">Post</button>
+			</div>
+    	</form>
+    </div>
+</div>
+
+{% endblock pagecontent %}
