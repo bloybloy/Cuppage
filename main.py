@@ -56,10 +56,7 @@ class Login(BaseHandler):
             addUser = User(email=self.user().email(), nickname=self.user().nickname())
             addUser.put()
 
-            self.redirect('/settings')
-
-        else:
-            self.redirect('/projects')
+        self.redirect('/projects')
 
 # END: Login
 
@@ -190,30 +187,19 @@ class Dashboard(BaseHandler):
 
 # END: Render Dashboard
 
-# START: Start Discussion
-class StartDiscussion(BaseHandler):
-    def post(self):
-        title = self.request.get('inputTitle')
+# START: Active Discussion
+class ActiveDiscussion(BaseHandler):
+    def get(self, threadId):
+        self.response.set_cookie('threadId', threadId, path='/')
 
-        if title:
-            newDiscussion = Discussion(project=self.activeProject(), creator=self.Me(), title=title)                
-            newDiscussion.put()
+        self.redirect('/discussion')
 
-            newPost = Post(discussion=newDiscussion, author=self.Me(), content=self.request.get('inputPost'))
-            newPost.put()
-
-            self.redirect('/dashboard')
-            
-        else:
-            alertMsg = "You did not provide a title for your discussion."
-            self.redirect('/dashboard?alertMsg={}'.format(alertMsg))
-
-# END: Start Discussion
+# END: Active Discussion
 
 # START: Show Discussion
 class ShowDiscussion(BaseHandler):
     def get(self):
-        threadId = self.request.get('thread')
+        threadId = int(self.request.cookies.get('threadId'))
         discussion = Discussion.get_by_id(int(threadId))
         alert = self.request.get('alertMsg')
         page = 'discussions.html'
@@ -232,21 +218,50 @@ class ShowDiscussion(BaseHandler):
         }
         self.render(page, template_values)
 
+    # Create Posts on Discussion    
     def post(self, threadId):
-        newContent = self.request.get('inputPost')
-        targetThread = Discussion.get_by_id(int(threadId))
-        if newContent:
-            newPost = Post(discussion=targetThread, author=self.Me(), content=newContent)
-            newPost.put()
+        targetDiscussion = Discussion.get_by_id(int(threadId))
+        newPost = Post(discussion=targetDiscussion, author=self.Me(), content=self.request.get('inputPost'))
+        newPost.put()
 
-            self.redirect('/discussion?thread={}'.format(threadId))
-
-        else:
-            alertMsg = "You did not enter any content for your post."
-            self.redirect('/discussion?alertMsg={}'.format(alertMsg))
-        
+        self.redirect('/discussion?thread={}'.format(threadId))
 
 # END: Show Discussion
+
+# START: Delete Post
+class DeletePost(BaseHandler):
+    def get(self, postId):
+        targetPost = Post.get_by_id(int(postId))
+
+        targetPost.delete()
+
+        self.redirect('/discussion')
+
+# END: Delete Post
+
+# START: Start Discussion
+class StartDiscussion(BaseHandler):
+    def post(self):
+        newDiscussion = Discussion(project=self.activeProject(), creator=self.Me(), title=self.request.get('inputTitle'))                
+        newDiscussion.put()
+
+        newPost = Post(discussion=newDiscussion, author=self.Me(), content=self.request.get('inputPost'))
+        newPost.put()
+
+        self.redirect('/dashboard')
+
+# END: Start Discussion
+
+# START: Delete Discussion
+class DeleteDiscussion(BaseHandler):
+    def get(self, threadId):
+        targetDiscussion = Discussion.get_by_id(int(threadId))
+
+        targetDiscussion.delete()
+
+        self.redirect('/dashboard')
+
+# END: Delete Discussion
 
 # START: New Task
 class AddTask(BaseHandler):
@@ -394,19 +409,25 @@ app = webapp2.WSGIApplication([
     ('/settings', UserSettings),
     ('/projects', Projects),
     ('/newProject', NewProject),
+    webapp2.Route(r'/editProject/<projectId:\d+>', EditProject),
+    webapp2.Route(r'/activeProject/<projectId:\d+>', ActiveProject),
+
+    webapp2.Route(r'/activeDiscussion/<threadId:\d+>', ActiveDiscussion),
     ('/startDiscussion', StartDiscussion),
+    webapp2.Route(r'/deleteThread/<threadId:\d+>', DeleteDiscussion),
     ('/discussion', ShowDiscussion),
     webapp2.Route(r'/post/<threadId:\d+>', ShowDiscussion),
-    #webapp2.Route(r'/discussion/<threadId:\d+>', ShowDiscussion),
-    ('/addTask', AddTask),
+    webapp2.Route(r'/deletePost/<postId:\d+>', DeletePost),
+
     ('/dashboard', Dashboard),
-    webapp2.Route(r'/activeProject/<projectId:\d+>', ActiveProject),
-    webapp2.Route(r'/editProject/<projectId:\d+>', EditProject),
+
+    ('/addTask', AddTask),    
     webapp2.Route(r'/done/<taskId:\d+>', CompleteTask),
     webapp2.Route(r'/edit/<taskId:\d+>', EditTask),
     webapp2.Route(r'/delete/<taskId:\d+>', DeleteTask),
     webapp2.Route(r'/accept/<taskId:\d+>', AcceptTask),
     webapp2.Route(r'/reject/<taskId:\d+>', RejectTask),
+    
     ('/upload', UploadBlob),
     webapp2.Route(r'/serve/<blobKey:([^/]+)?>', ServeBlob),
     webapp2.Route(r'/deleteBlob/<blobKey:([^/]+)?>', DeleteBlob),

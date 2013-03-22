@@ -15,7 +15,10 @@
 			{% for p in posts %}
 			<tr>
 				<td>{{ p.author.nickname }}</td>
-				<td>{{ p.content }}</td>
+				<td>
+					{{ p.content }}
+					<a class="pull-right" href="deletePost/{{ p.key().id() }}"><i class="icon-remove"></i></a>
+				</td>
 				<td>{{ p.created|timeformat }}</td>
 			</tr>
 			{% endfor %}

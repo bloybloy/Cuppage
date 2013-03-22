@@ -7,6 +7,7 @@
     <li><h3>Live Projects</h3></li>
     <li><a class="btn btn-mini" href="#newProjectModal" role="button" data-toggle="modal"><i class="icon-plus"></i> New Project</a></li>
   </ul>
+  {% if projectExists %}
 	<table class="table table-bordered table-hover">
     <thead>
       <tr>
@@ -59,6 +60,9 @@
       </tr>
     {% endfor %}
   </table>
+  {% else %}
+  <p>There are currently no projects. Start by creating one!</p>
+  {% endif %}
   
   <div id="newProjectModal" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
     <div class="modal-header">
