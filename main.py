@@ -53,9 +53,9 @@ class Login(BaseHandler):
     def get(self):
         #Check is user exists in User(db.Model). If user does not exists, add user to User(db.Model).
         if not self.Me():
-            addUser = User(email=self.user().email(), nickname=self.user().nickname(
+            addUser = User(email=self.user().email(), nickname=self.user().nickname())
             addUser.put()
-
+        
         self.redirect('/projects')
 
 # END: Login
